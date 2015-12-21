@@ -25,13 +25,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
 
 	HWND hWnd = CreateWindowEx(NULL, 
-	        wc.lpszClassName, "Title String",
+	        wc.lpszClassName, "Versuse",
 			WS_OVERLAPPEDWINDOW,
-			200, 200, 640, 480,	NULL, NULL,
+			CW_USEDEFAULT, 200, 640, 480,	NULL, NULL,
 			hInstance, NULL);
 
 	if (hWnd == NULL) {
-		MessageBox(NULL, "Window Registration Failed!", "Error! aaaaaaa!", MB_ICONEXCLAMATION | MB_OK);
+		MessageBox(NULL, "Window Creation Failed!", "Error! aaaaaaa!", MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
 
