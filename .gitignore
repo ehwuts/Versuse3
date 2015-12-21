@@ -1,6 +1,2 @@
-*
-!*.cpp
-!*.hpp
-!*.rc
-!Makefile
-!versuse.res
+src/*.o
+bin/*
