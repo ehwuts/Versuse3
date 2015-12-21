@@ -30,13 +30,25 @@
 
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-HWND widthRef;
-HWND trackRef;
+void UpdateWidthDisplay(HWND hWnd);
+int SaveSettings();
+
+enum Align { LEFT = 1, CENTER = 2, RIGHT = 3 };
+
+// GLOBALS EVERYWHERE GLOBALS
+Align alignL = CENTER;
+Align alignR = CENTER;
+short outw = 68;
+char leftname[41] = "";
+char rightname[41] = "";
+char outfile[26] = "versuse-conf.txt";
+short leftscore = 0;
+short rightscore = 0;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
-{
+{	
     WNDCLASSEX wc = {0};
-	
+		
 	wc.cbSize        = sizeof(wc);
 	wc.lpszClassName = "versuseMain";
 	wc.lpszMenuName  = NULL;
@@ -83,122 +95,132 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch(msg)	{
 		case WM_CREATE:
 		{
-			HWND init;
-			init = CreateWindowEx(WS_EX_CLIENTEDGE, 
-								"EDIT", "", 
-								WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
-								4, 4, 168, 24,
-								hWnd, (HMENU)VERSUSE_EDIT_LEFTNAME,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(WS_EX_CLIENTEDGE, 
-								"EDIT", "", 
-								WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
-								184, 4, 36, 24,
-								hWnd, (HMENU)VERSUSE_EDIT_LEFTSCORE,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"BUTTON", "", 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON|WS_GROUP,
-								232, 4, 24, 24,
-								hWnd, (HMENU)VERSUSE_OPTION_LEFT_L,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"BUTTON", "", 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
-								254, 4, 24, 24,
-								hWnd, (HMENU)VERSUSE_OPTION_LEFT_C,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"BUTTON", "", 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
-								276, 4, 24, 24,
-								hWnd, (HMENU)VERSUSE_OPTION_LEFT_R,
-								GetModuleHandle(NULL), NULL);
+			FILE *conf = fopen("versuse.conf", "r");
+			if (conf == NULL) {
+				//try write defaults
+				if (SaveSettings()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION | MB_OK);
+			} else {
+				//read in saved values
+				
+				fclose(conf);
+			}
+			
+			CreateWindowEx(WS_EX_CLIENTEDGE, 
+							"EDIT", "", 
+							WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
+							4, 4, 168, 24,
+							hWnd, (HMENU)VERSUSE_EDIT_LEFTNAME,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(WS_EX_CLIENTEDGE, 
+							"EDIT", "", 
+							WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
+							184, 4, 36, 24,
+							hWnd, (HMENU)VERSUSE_EDIT_LEFTSCORE,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"BUTTON", "", 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON|WS_GROUP,
+							232, 4, 24, 24,
+							hWnd, (HMENU)VERSUSE_OPTION_LEFT_L,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"BUTTON", "", 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
+							254, 4, 24, 24,
+							hWnd, (HMENU)VERSUSE_OPTION_LEFT_C,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"BUTTON", "", 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
+							276, 4, 24, 24,
+							hWnd, (HMENU)VERSUSE_OPTION_LEFT_R,
+							GetModuleHandle(NULL), NULL);
 								
-			init = CreateWindowEx(WS_EX_CLIENTEDGE, 
-								"EDIT", "", 
-								WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
-								4, 32, 168, 24,
-								hWnd, (HMENU)VERSUSE_EDIT_RIGHTNAME,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(WS_EX_CLIENTEDGE, 
-								"EDIT", "", 
-								WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
-								184, 32, 36, 24,
-								hWnd, (HMENU)VERSUSE_EDIT_RIGHTSCORE,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"BUTTON", "", 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON|WS_GROUP,
-								232, 32, 24, 24,
-								hWnd, (HMENU)VERSUSE_OPTION_RIGHT_L,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"BUTTON", "", 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
-								254, 32, 24, 24,
-								hWnd, (HMENU)VERSUSE_OPTION_RIGHT_C,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"BUTTON", "", 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
-								276, 32, 24, 24,
-								hWnd, (HMENU)VERSUSE_OPTION_RIGHT_R,
-								GetModuleHandle(NULL), NULL);
+			CreateWindowEx(WS_EX_CLIENTEDGE, 
+							"EDIT", "", 
+							WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
+							4, 32, 168, 24,
+							hWnd, (HMENU)VERSUSE_EDIT_RIGHTNAME,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(WS_EX_CLIENTEDGE, 
+							"EDIT", "", 
+							WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
+							184, 32, 36, 24,
+							hWnd, (HMENU)VERSUSE_EDIT_RIGHTSCORE,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"BUTTON", "", 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON|WS_GROUP,
+							232, 32, 24, 24,
+							hWnd, (HMENU)VERSUSE_OPTION_RIGHT_L,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"BUTTON", "", 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
+							254, 32, 24, 24,
+							hWnd, (HMENU)VERSUSE_OPTION_RIGHT_C,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"BUTTON", "", 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
+							276, 32, 24, 24,
+							hWnd, (HMENU)VERSUSE_OPTION_RIGHT_R,
+							GetModuleHandle(NULL), NULL);
 								
-			init = CreateWindowEx(NULL, 
-								"BUTTON", "Write", 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_DEFPUSHBUTTON,
-								4, 60, 100, 24,
-								hWnd, (HMENU)VERSUSE_BUTTON_WRITE,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"STATIC", VERSUSE_STRING_VERSION, 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD,
-								188, 64, 36, 24,
-								hWnd, (HMENU)VERSUSE_STATIC_VERSION,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"STATIC", VERSUSE_STRING_L, 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD,
-								234, 64, 24, 24,
-								hWnd, (HMENU)VERSUSE_STATIC_L,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"STATIC", VERSUSE_STRING_C, 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD,
-								256, 64, 24, 24,
-								hWnd, (HMENU)VERSUSE_STATIC_C,
-								GetModuleHandle(NULL), NULL);
-			init = CreateWindowEx(NULL, 
-								"STATIC", VERSUSE_STRING_R, 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD,
-								278, 64, 24, 24,
-								hWnd, (HMENU)VERSUSE_STATIC_R,
-								GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"BUTTON", "Write", 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_DEFPUSHBUTTON,
+							4, 60, 100, 24,
+							hWnd, (HMENU)VERSUSE_BUTTON_WRITE,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"STATIC", VERSUSE_STRING_VERSION, 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD,
+							188, 64, 36, 24,
+							hWnd, (HMENU)VERSUSE_STATIC_VERSION,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"STATIC", VERSUSE_STRING_L, 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD,
+							234, 64, 24, 24,
+							hWnd, (HMENU)VERSUSE_STATIC_L,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"STATIC", VERSUSE_STRING_C, 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD,
+							256, 64, 24, 24,
+							hWnd, (HMENU)VERSUSE_STATIC_C,
+							GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"STATIC", VERSUSE_STRING_R, 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD,
+							278, 64, 24, 24,
+							hWnd, (HMENU)VERSUSE_STATIC_R,
+							GetModuleHandle(NULL), NULL);
 								
 								
-			trackRef = CreateWindowEx(NULL, 
-								"msctls_trackbar32", "Trackbar Control", 
-								WS_VISIBLE|WS_CHILD,
-								2, 88, 292, 12,
-								hWnd, (HMENU)VERSUSE_TRACKBAR_WIDTH,
-								GetModuleHandle(NULL), NULL);
-			widthRef = CreateWindowEx(NULL, 
-								"STATIC", "100", 
-								WS_TABSTOP|WS_VISIBLE|WS_CHILD,
-								130, 64, 24, 24,
-								hWnd, (HMENU)VERSUSE_STATIC_SLIDER,
-								GetModuleHandle(NULL), NULL);
+			CreateWindowEx(NULL, 
+							"STATIC", "", 
+							WS_TABSTOP|WS_VISIBLE|WS_CHILD,
+							130, 64, 24, 24,
+							hWnd, (HMENU)VERSUSE_STATIC_SLIDER,
+							GetModuleHandle(NULL), NULL);
+			HWND trackRef = CreateWindowEx(NULL, 
+							"msctls_trackbar32", "Output Width", 
+							WS_VISIBLE|WS_CHILD|TBS_AUTOTICKS|TBS_ENABLESELRANGE,
+							2, 88, 292, 12,
+							hWnd, (HMENU)VERSUSE_TRACKBAR_WIDTH,
+							GetModuleHandle(NULL), NULL);
+			SendMessage(trackRef, TBM_SETRANGE, true, MAKELONG(51,161));
+			SendMessage(trackRef, TBM_SETSEL, true, MAKELONG(68,100));
+			SendMessage(trackRef, TBM_SETPAGESIZE, 0,  2); 
+			SendMessage(trackRef, TBM_SETTICFREQ, 10, 0); 
+			SendMessage(trackRef, TBM_SETPOS, true, outw); 
+			UpdateWidthDisplay(hWnd);
 		}
 		break;
 		case WM_HSCROLL:
-		{
-			LRESULT pos = SendMessage(trackRef, TBM_GETPOS, 0, 0);
-			char buf[4];
-			sprintf(buf, "%03ld", pos);
-			SetWindowText(widthRef, buf);
-		}
+			UpdateWidthDisplay(hWnd);
 		break;
 		case WM_COMMAND:
 			switch(LOWORD(wParam)) {
@@ -221,4 +243,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	if (acted) return 0;
 	else return DefWindowProc(hWnd,msg,wParam,lParam);
+}
+
+void UpdateWidthDisplay(HWND hWnd) {
+	LRESULT pos = SendMessage(GetDlgItem(hWnd, VERSUSE_TRACKBAR_WIDTH), TBM_GETPOS, 0, 0);
+	char buf[4];
+	outw = pos;
+	sprintf(buf, "%03d", (short)pos);
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_STATIC_SLIDER), buf);
+}
+
+/*
+Align alignL = CENTER;
+Align alignR = CENTER;
+short outW = 68;
+std::string leftname = "";
+std::string rightname = "";
+short rightscore = 0;
+*/
+int SaveSettings() {
+	FILE *fd = fopen("versuse.conf", "w");
+	if (fd == NULL) return -1;
+	fprintf(fd, "%s\n%d %d %d\n%s\n%d\n%s\n%d\nMax supported output filename length is 25 characters.\nMax supported name length is 40 characters.", outfile, outw, alignL, alignR, leftname, leftscore, rightname, rightscore);
+	fclose(fd);
+	return 0;
 }
