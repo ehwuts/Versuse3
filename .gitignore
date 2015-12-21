@@ -1,2 +1,6 @@
 *
 !*.cpp
+!*.hpp
+!*.rc
+!Makefile
+!versuse.res

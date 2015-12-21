@@ -1,0 +1,27 @@
+#include "versuse.hpp"
+
+1 VERSIONINFO
+FILEVERSION     0,8,0,0
+PRODUCTVERSION  1,0,0,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "FileDescription", "Converts inputs into output"
+      VALUE "FileVersion", "0.8"
+      VALUE "InternalName", "versuse"
+      VALUE "LegalCopyright", "Ehwuts Matsu"
+      VALUE "OriginalFilename", "versuse.exe"
+      VALUE "ProductName", "Versuse"
+      VALUE "ProductVersion", "0.8"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1252
+  END
+END
+
+VERSUSE_ICON ICON "gc_ico2.ico"
