@@ -1,5 +1,9 @@
 #include <windows.h>
 
+/*
+* this blob of defines makes me sad but defining things as local
+* constants broke more than I was up for fixing pre-function
+*/
 #define VERSUSE_BUTTON_WRITE 101
 #define VERSUSE_EDIT_LEFTNAME 111
 #define VERSUSE_EDIT_LEFTSCORE 113
@@ -11,6 +15,15 @@
 #define VERSUSE_OPTION_RIGHT_L 124
 #define VERSUSE_OPTION_RIGHT_C 125
 #define VERSUSE_OPTION_RIGHT_R 126
+#define VERSUSE_STATIC_VERSION 131
+#define VERSUSE_STATIC_L 131
+#define VERSUSE_STATIC_C 132
+#define VERSUSE_STATIC_R 133
+#define VERSUSE_STRING_VERSION "v0.3"
+#define VERSUSE_STRING_L "L"
+#define VERSUSE_STRING_C "C"
+#define VERSUSE_STRING_R "R"
+
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -39,7 +52,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HWND hWnd = CreateWindowEx(NULL, 
 	        wc.lpszClassName, "Versuse",
 			WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT, 200, 550, 411,
+			CW_USEDEFAULT, 200, 312, 124,
 			NULL, NULL,
 			hInstance, NULL);
 
@@ -66,34 +79,96 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			HWND init;
 			init = CreateWindowEx(WS_EX_CLIENTEDGE, 
-								"Edit", "", 
-								WS_CHILD|WS_VISIBLE|ES_MULTILINE|ES_AUTOVSCROLL|ES_AUTOHSCROLL,
-								16, 4, 170, 24,
+								"EDIT", "", 
+								WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
+								4, 4, 168, 24,
 								hWnd, (HMENU)VERSUSE_EDIT_LEFTNAME,
 								GetModuleHandle(NULL), NULL);
 			init = CreateWindowEx(WS_EX_CLIENTEDGE, 
-								"Edit", "", 
-								WS_CHILD|WS_VISIBLE|ES_MULTILINE|ES_AUTOVSCROLL|ES_AUTOHSCROLL,
-								190, 4, 36, 24,
+								"EDIT", "", 
+								WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
+								184, 4, 36, 24,
 								hWnd, (HMENU)VERSUSE_EDIT_LEFTSCORE,
 								GetModuleHandle(NULL), NULL);
+			init = CreateWindowEx(NULL, 
+								"BUTTON", "", 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON|WS_GROUP,
+								232, 4, 24, 24,
+								hWnd, (HMENU)VERSUSE_OPTION_LEFT_L,
+								GetModuleHandle(NULL), NULL);
+			init = CreateWindowEx(NULL, 
+								"BUTTON", "", 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
+								254, 4, 24, 24,
+								hWnd, (HMENU)VERSUSE_OPTION_LEFT_C,
+								GetModuleHandle(NULL), NULL);
+			init = CreateWindowEx(NULL, 
+								"BUTTON", "", 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
+								276, 4, 24, 24,
+								hWnd, (HMENU)VERSUSE_OPTION_LEFT_R,
+								GetModuleHandle(NULL), NULL);
+								
 			init = CreateWindowEx(WS_EX_CLIENTEDGE, 
-								"Edit", "", 
-								WS_CHILD|WS_VISIBLE|ES_MULTILINE|ES_AUTOVSCROLL|ES_AUTOHSCROLL,
-								16, 32, 170, 24,
+								"EDIT", "", 
+								WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
+								4, 32, 168, 24,
 								hWnd, (HMENU)VERSUSE_EDIT_RIGHTNAME,
 								GetModuleHandle(NULL), NULL);
 			init = CreateWindowEx(WS_EX_CLIENTEDGE, 
-								"Edit", "", 
-								WS_CHILD|WS_VISIBLE|ES_MULTILINE|ES_AUTOVSCROLL|ES_AUTOHSCROLL,
-								190, 32, 36, 24,
+								"EDIT", "", 
+								WS_CHILD|WS_VISIBLE|ES_CENTER|ES_AUTOHSCROLL,
+								184, 32, 36, 24,
 								hWnd, (HMENU)VERSUSE_EDIT_RIGHTSCORE,
 								GetModuleHandle(NULL), NULL);
 			init = CreateWindowEx(NULL, 
-								"Button", "Write", 
+								"BUTTON", "", 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON|WS_GROUP,
+								232, 32, 24, 24,
+								hWnd, (HMENU)VERSUSE_OPTION_RIGHT_L,
+								GetModuleHandle(NULL), NULL);
+			init = CreateWindowEx(NULL, 
+								"BUTTON", "", 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
+								254, 32, 24, 24,
+								hWnd, (HMENU)VERSUSE_OPTION_RIGHT_C,
+								GetModuleHandle(NULL), NULL);
+			init = CreateWindowEx(NULL, 
+								"BUTTON", "", 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_AUTORADIOBUTTON,
+								276, 32, 24, 24,
+								hWnd, (HMENU)VERSUSE_OPTION_RIGHT_R,
+								GetModuleHandle(NULL), NULL);
+								
+			init = CreateWindowEx(NULL, 
+								"BUTTON", "Write", 
 								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_DEFPUSHBUTTON,
 								4, 60, 100, 24,
 								hWnd, (HMENU)VERSUSE_BUTTON_WRITE,
+								GetModuleHandle(NULL), NULL);
+			init = CreateWindowEx(NULL, 
+								"STATIC", VERSUSE_STRING_VERSION, 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_DEFPUSHBUTTON,
+								184, 64, 36, 24,
+								hWnd, (HMENU)VERSUSE_STATIC_VERSION,
+								GetModuleHandle(NULL), NULL);
+			init = CreateWindowEx(NULL, 
+								"STATIC", VERSUSE_STRING_L, 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_DEFPUSHBUTTON,
+								226, 64, 24, 24,
+								hWnd, (HMENU)VERSUSE_STATIC_L,
+								GetModuleHandle(NULL), NULL);
+			init = CreateWindowEx(NULL, 
+								"STATIC", VERSUSE_STRING_C, 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_DEFPUSHBUTTON,
+								248, 64, 24, 24,
+								hWnd, (HMENU)VERSUSE_STATIC_C,
+								GetModuleHandle(NULL), NULL);
+			init = CreateWindowEx(NULL, 
+								"STATIC", VERSUSE_STRING_R, 
+								WS_TABSTOP|WS_VISIBLE|WS_CHILD|BS_DEFPUSHBUTTON,
+								270, 64, 24, 24,
+								hWnd, (HMENU)VERSUSE_STATIC_R,
 								GetModuleHandle(NULL), NULL);
 		}
 		break;
