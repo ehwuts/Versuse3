@@ -6,13 +6,15 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void UpdateWidthDisplay(HWND hWnd);
+int ReadSettings();
 int SaveSettings();
+void LoadDefaults(HWND hWnd);
 
 //enum Align { LEFT = 1, CENTER = 2, RIGHT = 3 };
 
 // GLOBALS EVERYWHERE GLOBALS
 char outfile[26] = "versuse-out.txt";
-int outw = 68;
+int outw = 69;
 int alignL = 2;
 int alignR = 2;
 char leftname[41] = "";
@@ -76,8 +78,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if (SaveSettings()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION | MB_OK);
 			} else {
 				//read in saved values
-				fscanf(conf, VERSUSE_STRING_CONFIG_FORMAT, VERSUSE_LIST_CONFIG_VARS_GET);
 				fclose(conf);
+				if (ReadSettings()) MessageBox(hWnd, "Something went wrong reading existing config.", "Err", MB_ICONEXCLAMATION | MB_OK);
 			}
 			HWND init;
 			CreateWindowEx(WS_EX_CLIENTEDGE, 
@@ -186,17 +188,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							130, 64, 24, 24,
 							hWnd, (HMENU)VERSUSE_STATIC_SLIDER,
 							GetModuleHandle(NULL), NULL);
-			HWND trackRef = CreateWindowEx(NULL, 
+			init = CreateWindowEx(NULL, 
 							"msctls_trackbar32", "Output Width", 
 							WS_VISIBLE|WS_CHILD|TBS_AUTOTICKS|TBS_ENABLESELRANGE,
 							2, 88, 292, 12,
 							hWnd, (HMENU)VERSUSE_TRACKBAR_WIDTH,
 							GetModuleHandle(NULL), NULL);
-			SendMessage(trackRef, TBM_SETRANGE, true, MAKELONG(51,161));
-			SendMessage(trackRef, TBM_SETSEL, true, MAKELONG(68,100));
-			SendMessage(trackRef, TBM_SETPAGESIZE, 0,  2); 
-			SendMessage(trackRef, TBM_SETTICFREQ, 10, 0); 
-			SendMessage(trackRef, TBM_SETPOS, true, outw); 
+			SendMessage(init, TBM_SETRANGE, true, MAKELONG(51,161));
+			SendMessage(init, TBM_SETSEL, true, MAKELONG(68,100));
+			SendMessage(init, TBM_SETPAGESIZE, 0,  2); 
+			SendMessage(init, TBM_SETTICFREQ, 10, 0); 
+			SendMessage(init, TBM_SETPOS, true, outw); 
 			UpdateWidthDisplay(hWnd);
 		}
 		break;
@@ -234,19 +236,73 @@ void UpdateWidthDisplay(HWND hWnd) {
 	sprintf(buf, "%03d", (short)pos);
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_STATIC_SLIDER), buf);
 }
-
 /*
-Align alignL = CENTER;
-Align alignR = CENTER;
-short outW = 68;
-std::string leftname = "";
-std::string rightname = "";
-short rightscore = 0;
+#define VERSUSE_LIST_CONFIG_VARS_GET_1 outfile
+#define VERSUSE_LIST_CONFIG_VARS_GET_2 &outw, &alignL, &alignR
+#define VERSUSE_LIST_CONFIG_VARS_GET_3 leftname
+#define VERSUSE_LIST_CONFIG_VARS_GET_4 leftscore
+#define VERSUSE_LIST_CONFIG_VARS_GET_5 rightname
+#define VERSUSE_LIST_CONFIG_VARS_GET_6 rightscore
+
+char outfile[26] = "versuse-out.txt";
+int outw = 69;
+int alignL = 2;
+int alignR = 2;
+char leftname[41] = "";
+char leftscore[4] = "0";
+char rightname[41] = "";
+char rightscore[4] = "0";
 */
-int SaveSettings() {
-	FILE *fd = fopen(VERSUSE_STRING_CONFIG, "w");
-	if (fd == NULL) return -1;
-	fprintf(fd, VERSUSE_STRING_CONFIG_FORMAT, VERSUSE_LIST_CONFIG_VARS_SET);
-	fclose(fd);
+int ReadSettings() {
+	char buf[41] = {0};
+	FILE *fp = fopen(VERSUSE_STRING_CONFIG, "r");
+	if (fp == NULL) return -1;
+	if (fgets(buf, 41, fp) == NULL) return 1;
+	if (sscanf(buf, "%s\n", outfile) != 1) return 2;
+	if (fgets(buf, 41, fp) == NULL) return 3;
+	if (sscanf(buf, "%d %d %d\n", &outw, &alignL, &alignR) != 3) return 4;
+	if (fgets(buf, 41, fp) == NULL) return 5;
+	if (sscanf(buf, "%s\n", leftname) != 1) leftname[0] = '\0';
+	if (fgets(buf, 41, fp) == NULL) return 7;
+	if (sscanf(buf, "%s\n", leftscore) != 1) {
+		leftscore[0] = '0';
+		leftscore[1] = '\0';
+	}
+	if (fgets(buf, 41, fp) == NULL) return 9;
+	if (sscanf(buf, "%s\n", rightname) != 1) rightname[0] = '\0';
+	if (fgets(buf, 41, fp) == NULL) return 11;
+	if (sscanf(buf, "%s\n", rightscore) != 1) {
+		rightscore[0] = '0';
+		rightscore[1] = '\0';
+	}
+	
 	return 0;
+}
+
+int SaveSettings() {
+	FILE *fp = fopen(VERSUSE_STRING_CONFIG, "w");
+	if (fp == NULL) return -1;
+	fprintf(fp, VERSUSE_STRING_CONFIG_FORMAT, VERSUSE_LIST_CONFIG_VARS_SET);
+	fclose(fp);
+	return 0;
+}
+
+void LoadDefaults(HWND hWnd) {
+	outw = 69;
+	alignL = 2;
+	alignR = 2;
+	leftname[0] = '\0';
+	leftscore[0] = '0';
+	leftscore[1] = '\0';
+	rightname[0] = '\0';
+	rightscore[0] = '0';
+	rightscore[1] = '\0';
+	SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_LEFT_C), BM_SETCHECK, BST_CHECKED, 0);
+	SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_RIGHT_C), BM_SETCHECK, BST_CHECKED, 0);
+	SendMessage(GetDlgItem(hWnd, VERSUSE_TRACKBAR_WIDTH), TBM_SETPOS, true, outw);
+	UpdateWidthDisplay(hWnd);
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), leftname);
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore);
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname);
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore);
 }

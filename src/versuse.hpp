@@ -1,3 +1,7 @@
+#ifndef VERSUSE_H
+
+#define VERSUSE_H
+
 /*
 * this blob of defines makes me sad but defining things as local
 * constants broke more than I was up for fixing pre-functionality
@@ -28,4 +32,5 @@
 #define VERSUSE_STRING_CONFIG "versuse-conf.txt"
 #define VERSUSE_STRING_CONFIG_FORMAT "%s\n%d %d %d\n%s\n%s\n%s\n%s\nThings to avoid to prevent unexpected behaviour:\noutput filename length above 25 characters.\nname length above 40 characters\nscores more than 3 characters"
 #define VERSUSE_LIST_CONFIG_VARS_SET outfile, outw, alignL, alignR, leftname, leftscore, rightname, rightscore
-#define VERSUSE_LIST_CONFIG_VARS_GET &outfile, &outw, &alignL, &alignR, &leftname, &leftscore, &rightname, &rightscore
+
+#endif
