@@ -1,0 +1,2 @@
+currently no bounds checking
+config and stuff write calling dir, not exe location

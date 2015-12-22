@@ -2,35 +2,41 @@ NAME=Versuse
 
 SOURCE=./src/
 OUTPUT=./bin/
-
 CC=g++
-CFLAGS=-c -Wall
+CFLAGS=-O2 -Wall
 LFLAGS=
+RC=windres
+RFLAGS=-O coff
 
 EXE=$(OUTPUT)$(NAME)
-SOURCES=$(wildcard $(SOURCE)*.cpp)
-OBJECTS=$(SOURCES:.cpp=.o)
-RESOURCES=$(SOURCES:.rc=.res)
+SRC=$(wildcard $(SOURCE)*.cpp)
+RES=$(wildcard $(SOURCE)*.rc)
+OBJ=$(SRC:.cpp=.o) $(RES:.rc=.res)
 
-#build: 
-#	windres versuse.rc -O coff -o versuse.res
-#	g++ -c -Wall versuse.cpp	
-#	g++ -o versuse.exe versuse.o versuse.res
+.PHONY: sbuild build debug clean
 
-build: $(SOURCES) $(RESOURCES) $(EXE)
+sbuild: 
+	$(RC) $(SOURCE)versuse.rc $(RFLAGS) -o $(SOURCE)versuse.res
+	$(CC) $(CFLAGS) $(SOURCE)versuse.cpp -o $(SOURCE)versuse.o	
+	$(CC) $(OBJ) -o $@ $(LFLAGS)
+
+build: $(SRC) $(RES) $(EXE)
 	
 debug: CFLAGS:=$(CFLAGS) -g
-debug: $(SOURCES) $(EXE)	
+debug: build		
 	
-$(EXE): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@ $(LFLAGS)
+$(EXE): $(OBJ)
+	$(CC) $(OBJ) -o $@ $(LFLAGS)
 	
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@	
 	
 .rc.res:
-	windres -O coff $< -o $@
+	$(RC) $< $(RFLAGS) -o $@
 	
-.PHONY: clean
 clean:
-	rm $(SOURCE)*.o $(OUTPUT)*
+	-rm $(SOURCE)*.o $(SOURCE)*.res $(OUTPUT)*
+
+print-%:
+	@echo $* = $($*)
+	echo $*\'s origin is $(origin $*)
