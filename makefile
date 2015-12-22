@@ -14,7 +14,7 @@ RESOURCES=$(SOURCES:.rc=.res)
 
 build: 
 	windres $(SOURCE)versuse.rc -O coff -o $(SOURCE)versuse.res
-	g++ -c -Wall $(SOURCE)versuse.cpp	
+	g++ -c -Wall $(SOURCE)versuse.cpp -o $(SOURCE)versuse.o
 	g++ -o $(EXE) $(SOURCE)versuse.o $(SOURCE)versuse.res
 	
 .PHONY: clean

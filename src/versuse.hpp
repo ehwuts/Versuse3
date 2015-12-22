@@ -6,7 +6,7 @@
 * this blob of defines makes me sad but defining things as local
 * constants broke more than I was up for fixing pre-functionality
 */
-#define VERSUSE_STRING_VERSION "v0.8"
+#define VERSUSE_STRING_VERSION "v0.9"
 
 #define VERSUSE_ICON 151
 #define VERSUSE_BUTTON_WRITE 101

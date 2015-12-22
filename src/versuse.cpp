@@ -9,6 +9,7 @@ void UpdateWidthDisplay(HWND hWnd);
 int ReadSettings();
 int SaveSettings();
 void LoadDefaults(HWND hWnd);
+int WriteText(HWND hWnd);
 
 //enum Align { LEFT = 1, CENTER = 2, RIGHT = 3 };
 
@@ -208,8 +209,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_COMMAND:
 			switch(LOWORD(wParam)) {
 				case VERSUSE_BUTTON_WRITE:
-					//if (SaveSettings()) MessageBox(hWnd, "Failed to save current config.", "Err", MB_ICONEXCLAMATION | MB_OK);
-					MessageBox(hWnd, "This isn't implemented yet :(", "Hi", MB_OK);
+				{
+					char buf[4];
+					GetWindowText(GetDlgItem(hWnd, VERSUSE_STATIC_SLIDER), buf, 4);
+					sprintf(buf, "%03d", outw);
+				}
+					if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_LEFT_L)) alignL = 1;
+					else if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_LEFT_R)) alignL = 3;
+					else alignL = 2;
+					if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_RIGHT_L)) alignR = 1;
+					else if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_RIGHT_R)) alignR = 3;
+					else alignR = 2;
+					
+					GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), leftname, 41);
+					GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore, 4);
+					GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname, 41);
+					GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore, 4);
+					if (SaveSettings()) MessageBox(hWnd, "Failed to save current config.", "Err", MB_ICONEXCLAMATION | MB_OK);
+					if (WriteText(hWnd)) MessageBox(hWnd, "Failure. FAILURE. NOOOOOO", "Err", MB_ICONEXCLAMATION | MB_OK);
 				break;
 				default:
 					acted = false;				
@@ -305,4 +322,9 @@ void LoadDefaults(HWND hWnd) {
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore);
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname);
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore);
+}
+
+int WriteText(HWND hWnd) {
+	MessageBox(hWnd, "This isn't implemented yet :(", "Hi", MB_OK);
+	return 0;
 }
