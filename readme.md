@@ -1,8 +1,10 @@
 Usage
 =====
+```
 make
 make clean
 rm -rf .
+```
 
 License
 =======
