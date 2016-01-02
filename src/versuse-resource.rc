@@ -1,8 +1,10 @@
 #include <windows.h>
 #include "versuse-main.hpp"
 
-VERSUSE_ICON ICON "gc_ico2.ico"
-//VERSUSE_ICO2	ICON dlgapp_s.ico
+VERSUSE_ICON ICON gc_ico2.ico
+/*
+VERSUSE_ICO2 ICON dlgapp_s.ico
+*/
 
 VERSUSE_MAIN DIALOGEX 20, 40, 148, 44
 STYLE DS_3DLOOK | WS_MINIMIZEBOX | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
