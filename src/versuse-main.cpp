@@ -48,6 +48,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	return msg.wParam;
 }
 
+void SaveSettingsOrComplain(HWND hWnd) {
+	if (SaveSettings()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION | MB_OK);
+}
+
+void ReadSettingsOrComplain(HWND hWnd) {
+	if (ReadSettings()) MessageBox(hWnd, "Something went wrong reading existing config.", "Err", MB_ICONEXCLAMATION | MB_OK);
+}
+
 BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	bool acted = true;
@@ -59,15 +67,13 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			hIcon = LoadIcon(augh, MAKEINTRESOURCE(TEST_ICO2));
 			SendMessage(hWnd, WM_SETICON, WPARAM(FALSE), LPARAM(hIcon));
 			
+			LoadDefaults();
+			
 			FILE *conf = fopen(VERSUSE_STRING_CONFIG, "r");
-			if (conf == NULL) {
-				//try write defaults
-				if (SaveSettings()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION | MB_OK);
-			} else {
-				//read in saved values
-				fclose(conf);
-				if (ReadSettings()) MessageBox(hWnd, "Something went wrong reading existing config.", "Err", MB_ICONEXCLAMATION | MB_OK);
-			}
+			if (conf == NULL) SaveSettingsOrComplain(hWnd);
+			else ReadSettingsOrComplain(hWnd);
+			fclose(conf);
+			
 			if (alignL == 1) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_LEFT_L), BM_SETCHECK, BST_CHECKED, 0);
 			if (alignL == 2) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_LEFT_C), BM_SETCHECK, BST_CHECKED, 0);
 			if (alignL == 3) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_LEFT_R), BM_SETCHECK, BST_CHECKED, 0);
