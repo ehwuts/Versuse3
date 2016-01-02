@@ -6,12 +6,17 @@
 
 BOOL CALLBACK DialogProc(HWND, UINT, WPARAM, LPARAM);
 
-int ReadSettings();
+void LoadDefaults();
 int SaveSettings();
-void LoadDefaults(HWND hWnd);
-int WriteText(HWND hWnd);
+int ReadSettings();
+void DisplaySettings(HWND);
+int WriteText(HWND);
+
 int MaxNum(int a, int b) { return (a > b ? a : b); }
 int MinNum(int a, int b) { return (a < b ? a : b); }
+
+void SaveSettingsOrComplain(HWND hWnd) { if (SaveSettings()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
+void ReadSettingsOrComplain(HWND hWnd) { if (ReadSettings()) MessageBox(hWnd, "Problem reading existing config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
 
 // GLOBALS EVERYWHERE GLOBALS
 char outfile[26] = "versuse-out.txt";
@@ -24,11 +29,11 @@ char leftscore[4] = "0";
 char rightname[41] = "";
 char rightscore[4] = "0";
 
-HINSTANCE augh = 0;
+HINSTANCE hInst = 0;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {	
-	augh = hInst;
+	hInst = hInstance;
 	HWND hDiag = 0;
 	
 	hDiag = CreateDialog(hInst, MAKEINTRESOURCE(TEST_MAIN), 0, (DLGPROC)DialogProc);
@@ -48,23 +53,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	return msg.wParam;
 }
 
-void SaveSettingsOrComplain(HWND hWnd) {
-	if (SaveSettings()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION | MB_OK);
-}
-
-void ReadSettingsOrComplain(HWND hWnd) {
-	if (ReadSettings()) MessageBox(hWnd, "Something went wrong reading existing config.", "Err", MB_ICONEXCLAMATION | MB_OK);
-}
-
 BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	bool acted = true;
 	switch (msg) {
 		case WM_INITDIALOG:
 		{
-			HICON hIcon = LoadIcon(augh, MAKEINTRESOURCE(TEST_ICON));
+			HICON hIcon = LoadIcon(hInst, MAKEINTRESOURCE(TEST_ICON));
 			SendMessage(hWnd, WM_SETICON, WPARAM(TRUE), LPARAM(hIcon));
-			hIcon = LoadIcon(augh, MAKEINTRESOURCE(TEST_ICO2));
+			hIcon = LoadIcon(hInst, MAKEINTRESOURCE(TEST_ICO2));
 			SendMessage(hWnd, WM_SETICON, WPARAM(FALSE), LPARAM(hIcon));
 			
 			LoadDefaults();
@@ -74,16 +71,7 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			else ReadSettingsOrComplain(hWnd);
 			fclose(conf);
 			
-			if (alignL == 1) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_LEFT_L), BM_SETCHECK, BST_CHECKED, 0);
-			if (alignL == 2) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_LEFT_C), BM_SETCHECK, BST_CHECKED, 0);
-			if (alignL == 3) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_LEFT_R), BM_SETCHECK, BST_CHECKED, 0);
-			if (alignR == 1) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHT_L), BM_SETCHECK, BST_CHECKED, 0);
-			if (alignR == 2) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHT_C), BM_SETCHECK, BST_CHECKED, 0);
-			if (alignR == 3) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHT_R), BM_SETCHECK, BST_CHECKED, 0);
-			SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), leftname.c_str());
-			SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore.c_str());
-			SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname.c_str());
-			SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore.c_str());
+			DisplaySettings(hWnd);
 		}
 		break;
 		case WM_COMMAND:
@@ -105,8 +93,8 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore, 4);
 					GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname, 41);
 					GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore, 4);
-					if (SaveSettings()) MessageBox(hWnd, "Failed to save current config.", "Err", MB_ICONEXCLAMATION | MB_OK);
-					if (WriteText(hWnd)) MessageBox(hWnd, "Failure. FAILURE. NOOOOOO", "Err", MB_ICONEXCLAMATION | MB_OK);
+					SaveSettingsOrComplain(hWnd);
+					WriteTextOrComplain(hWnd);
 				break;
 				default:
 					acted = false;				
@@ -158,7 +146,7 @@ int SaveSettings() {
 	return 0;
 }
 
-void LoadDefaults(HWND hWnd) {
+void LoadDefaults() {
 	outw = 69;
 	alignL = 2;
 	alignR = 2;
@@ -169,14 +157,6 @@ void LoadDefaults(HWND hWnd) {
 	rightscore[0] = '0';
 	rightscore[1] = '\0';
 	mono = 0;
-	SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_LEFT_C), BM_SETCHECK, BST_CHECKED, 0);
-	SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_RIGHT_C), BM_SETCHECK, BST_CHECKED, 0);
-	SendMessage(GetDlgItem(hWnd, VERSUSE_TRACKBAR_WIDTH), TBM_SETPOS, true, outw);
-	UpdateWidthDisplay(hWnd);
-	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), leftname);
-	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore);
-	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname);
-	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore);
 }
 
 //this function is what everything else is wrapping, and it is a sloppy mess
@@ -244,4 +224,17 @@ int WriteText(HWND hWnd) {
 	}
 	free(out);
 	return 0;
+}
+
+void DisplaySettings(HWND hWnd) {
+	if (alignL == 1) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_LEFT_L), BM_SETCHECK, BST_CHECKED, 0);
+	if (alignL == 2) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_LEFT_C), BM_SETCHECK, BST_CHECKED, 0);
+	if (alignL == 3) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_LEFT_R), BM_SETCHECK, BST_CHECKED, 0);
+	if (alignR == 1) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHT_L), BM_SETCHECK, BST_CHECKED, 0);
+	if (alignR == 2) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHT_C), BM_SETCHECK, BST_CHECKED, 0);
+	if (alignR == 3) SendMessage(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHT_R), BM_SETCHECK, BST_CHECKED, 0);
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), leftname.c_str());
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore.c_str());
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname.c_str());
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore.c_str());
 }
