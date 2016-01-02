@@ -1,20 +1,20 @@
 #include "versuse-main.hpp"
 
 1 VERSIONINFO
-FILEVERSION     VERSUSE_STRING_VERSION3
-PRODUCTVERSION  VERSUSE_STRING_PVERSION2
+FILEVERSION     VERSUSE_RES_VERSION
+PRODUCTVERSION  1,0,0,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "FileDescription", "Converts inputs into output"
-      VALUE "FileVersion", VERSUSE_STRING_VERSION2
+      VALUE "FileVersion", VERSUSE_RES_VERSION2
       VALUE "InternalName", "versuse"
       VALUE "LegalCopyright", "Ehwuts Matsu"
       VALUE "OriginalFilename", "versuse.exe"
       VALUE "ProductName", "Versuse"
-      VALUE "ProductVersion", VERSUSE_STRING_PVERSION
+      VALUE "ProductVersion", "1.0.0.0"
     END
   END
 
