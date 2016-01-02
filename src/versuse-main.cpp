@@ -1,20 +1,17 @@
 #include <windows.h>
-#include <commctrl.h>
 #include <cstdio>
 #include <cstring>
 
 #include "versuse-main.hpp"
 
-BOOL CALLBACK DialogProc (HWND, UINT, WPARAM, LPARAM);
-void UpdateWidthDisplay(HWND hWnd);
+BOOL CALLBACK DialogProc(HWND, UINT, WPARAM, LPARAM);
+
 int ReadSettings();
 int SaveSettings();
 void LoadDefaults(HWND hWnd);
 int WriteText(HWND hWnd);
 int MaxNum(int a, int b) { return (a > b ? a : b); }
 int MinNum(int a, int b) { return (a < b ? a : b); }
-
-//enum Align { LEFT = 1, CENTER = 2, RIGHT = 3 };
 
 // GLOBALS EVERYWHERE GLOBALS
 char outfile[26] = "versuse-out.txt";
@@ -50,36 +47,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	return msg.wParam;
 }
+
 BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	bool acted = true;
 	switch (msg) {
-		case WM_INITDIALOG:
-		{
-			HICON hIcon = LoadIcon(augh, MAKEINTRESOURCE(TEST_ICON));
-			SendMessage(hWnd, WM_SETICON, WPARAM(TRUE), LPARAM(hIcon));
-			hIcon = LoadIcon(augh, MAKEINTRESOURCE(TEST_ICO2));
-			SendMessage(hWnd, WM_SETICON, WPARAM(FALSE), LPARAM(hIcon));
-		}
-		break;
-		case WM_COMMAND:
-		
-		break;
-        case WM_CLOSE:
-            DestroyWindow(hWnd);
-        break;
-		case WM_DESTROY:
-			PostQuitMessage(0);
-		break;
-		default:
-			acted = false;
-	}
-	return acted;
-}
-BOOL CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	bool acted = true;
-	switch(msg)	{
 		case WM_INITDIALOG:
 		{
 			HICON hIcon = LoadIcon(augh, MAKEINTRESOURCE(TEST_ICON));
@@ -107,9 +79,6 @@ BOOL CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname.c_str());
 			SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore.c_str());
 		}
-		break;
-		case WM_HSCROLL:
-			UpdateWidthDisplay(hWnd);
 		break;
 		case WM_COMMAND:
 			switch(LOWORD(wParam)) {
@@ -143,29 +112,10 @@ BOOL CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_DESTROY:
 			PostQuitMessage(0);
 		break;
-		case WM_KEYUP:
-			switch (wParam) {
-				case VK_RETURN:
-					SendMessage(GetDlgItem(hWnd, VERSUSE_VUTTON_WRITE), BM_CLICK, 0, 0);
-				break;
-				default:
-					acted = false;
-			}
-		break;
 		default:
 			acted = false;
 	}
-
-	if (acted) return 0;
-	else return DefWindowProc(hWnd,msg,wParam,lParam);
-}
-
-void UpdateWidthDisplay(HWND hWnd) {
-	LRESULT pos = SendMessage(GetDlgItem(hWnd, VERSUSE_TRACKBAR_WIDTH), TBM_GETPOS, 0, 0);
-	char buf[4];
-	outw = pos;
-	sprintf(buf, "%03d", (short)pos);
-	SetWindowText(GetDlgItem(hWnd, VERSUSE_STATIC_SLIDER), buf);
+	return acted;
 }
 
 int ReadSettings() {
