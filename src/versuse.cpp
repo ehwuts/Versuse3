@@ -242,6 +242,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_DESTROY:
 			PostQuitMessage(0);
 		break;
+		case WM_KEYUP:
+			switch (wParam) {
+				case VK_RETURN:
+					SendMessage(GetDlgItem(hWnd, VERSUSE_VUTTON_WRITE), BM_CLICK, 0, 0);
+				break;
+				default:
+					acted = false;
+			}
+		break;
 		default:
 			acted = false;
 	}
@@ -257,23 +266,7 @@ void UpdateWidthDisplay(HWND hWnd) {
 	sprintf(buf, "%03d", (short)pos);
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_STATIC_SLIDER), buf);
 }
-/*
-#define VERSUSE_LIST_CONFIG_VARS_GET_1 outfile
-#define VERSUSE_LIST_CONFIG_VARS_GET_2 &outw, &alignL, &alignR
-#define VERSUSE_LIST_CONFIG_VARS_GET_3 leftname
-#define VERSUSE_LIST_CONFIG_VARS_GET_4 leftscore
-#define VERSUSE_LIST_CONFIG_VARS_GET_5 rightname
-#define VERSUSE_LIST_CONFIG_VARS_GET_6 rightscore
 
-char outfile[26] = "versuse-out.txt";
-int outw = 69;
-int alignL = 2;
-int alignR = 2;
-char leftname[41] = "";
-char leftscore[4] = "0";
-char rightname[41] = "";
-char rightscore[4] = "0";
-*/
 int ReadSettings() {
 	char buf[41] = {0};
 	FILE *fp = fopen(VERSUSE_STRING_CONFIG, "r");

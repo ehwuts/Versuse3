@@ -7,6 +7,10 @@
 * constants broke more than I was up for fixing pre-functionality
 */
 #define VERSUSE_STRING_VERSION "v1.0"
+#define VERSUSE_STRING_VERSION2 "1.0"
+#define VERSUSE_STRING_VERSION3 1,0,0,0
+#define VERSUSE_STRING_PVERSION "1.0"
+#define VERSUSE_STRING_PVERSION2 1,0,0,0
 
 #define VERSUSE_ICON 151
 #define VERSUSE_BUTTON_WRITE 101
