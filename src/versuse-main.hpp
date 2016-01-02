@@ -1,6 +1,6 @@
-#ifndef VERSUSE_H
+#ifndef VERSUSE_MAIN_H
 
-#define VERSUSE_H
+#define VERSUSE_MAIN_H
 
 /*
 * this blob of defines makes me sad but defining things as local

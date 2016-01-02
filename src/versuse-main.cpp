@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "versuse.hpp"
+#include "versuse-main.hpp"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void UpdateWidthDisplay(HWND hWnd);
