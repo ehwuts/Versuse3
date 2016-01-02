@@ -1,5 +1,4 @@
 #ifndef VERSUSE_MAIN_H
-
 #define VERSUSE_MAIN_H
 
 /*
