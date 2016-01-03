@@ -59,6 +59,7 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			//hIcon = LoadIcon(hInst, MAKEINTRESOURCE(VERSUSE_ICO2));
 			hIcon = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(VERSUSE_ICON), IMAGE_ICON, 16, 16, 0);
 			SendMessage(hWnd, WM_SETICON, WPARAM(FALSE), LPARAM(hIcon));
+			SendMessage(hWnd, DM_SETDEFID, VERSUSE_BUTTON_WRITE, 0);
 			
 			LoadDefaults();
 			

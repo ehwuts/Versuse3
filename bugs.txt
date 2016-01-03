@@ -1,2 +1,1 @@
-config and stuff write calling dir, not exe location
-pressing enter doesn't enter?
+config and output write calling dir, not exe location
