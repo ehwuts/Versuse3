@@ -28,7 +28,5 @@
 #define VERSUSE_STATIC_GENERIC 130
 
 #define VERSUSE_STRING_CONFIG "versuse-conf.txt"
-#define VERSUSE_STRING_CONFIG_FORMAT "%s\n%d %d %d %d\n%s\n%s\n%s\n%s\nThings to avoid to prevent unexpected behaviour:\noutput filename length above 25 characters.\nname length above 40 characters\nscores more than 3 characters"
-#define VERSUSE_LIST_CONFIG_VARS_SET outfile, outw, alignL, alignR, mono, leftname, leftscore, rightname, rightscore
 
 #endif

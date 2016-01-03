@@ -1,3 +1,2 @@
-currently no bounds checking
 config and stuff write calling dir, not exe location
-pressing enter doesn't enter
+pressing enter doesn't enter?

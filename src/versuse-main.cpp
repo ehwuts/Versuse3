@@ -1,35 +1,28 @@
 #include <windows.h>
-#include <cstdio>
-#include <cstring>
+#include <string>
+#include <fstream>
 
 #include "versuse-main.hpp"
 
 BOOL CALLBACK DialogProc(HWND, UINT, WPARAM, LPARAM);
 
 void LoadDefaults();
-int SaveSettings();
-int ReadSettings();
+int WriteSave();
+int ReadSave();
 int WriteText();
-void DisplaySettings(HWND);
+void WriteDisplay(HWND);
 void ReadDisplay(HWND);
 
 int MaxNum(int a, int b) { return (a > b ? a : b); }
 int MinNum(int a, int b) { return (a < b ? a : b); }
 
-void SaveSettingsOrComplain(HWND hWnd) { if (SaveSettings()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
-void ReadSettingsOrComplain(HWND hWnd) { if (ReadSettings()) MessageBox(hWnd, "Problem reading existing config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
+void WriteSaveOrComplain(HWND hWnd) { if (WriteSave()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
+void ReadSaveOrComplain(HWND hWnd) { if (ReadSave()) MessageBox(hWnd, "Problem reading existing config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
 void WriteTextOrComplain(HWND hWnd) { if (WriteText()) MessageBox(hWnd, "Failed to save display text.", "Welp", MB_OK|MB_ICONERROR); }
 
 // GLOBALS EVERYWHERE GLOBALS
-char outfile[26] = "versuse-out.txt";
-int outw = 69;
-int alignL = 2;
-int alignR = 2;
-int mono = 1;
-char leftname[41] = "";
-char leftscore[4] = "0";
-char rightname[41] = "";
-char rightscore[4] = "0";
+std::string outfile, leftname, leftscore, rightname, rightscore;
+int outw, alignL, alignR, mono;
 
 HINSTANCE hInst = 0;
 
@@ -41,7 +34,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	hDiag = CreateDialog(hInst, MAKEINTRESOURCE(VERSUSE_MAIN), 0, (DLGPROC)DialogProc);
 	
 	if (hDiag == NULL) {
-		MessageBox(NULL, "Window Creation Failed!", "Error! aaaaaaa!", MB_ICONEXCLAMATION | MB_OK);
+		MessageBox(NULL, "Window Creation Failed!", "Error! aaaaaaa!", MB_ICONEXCLAMATION|MB_OK);
 		return 0;
 	}
 
@@ -69,19 +62,19 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			
 			LoadDefaults();
 			
-			FILE *conf = fopen(VERSUSE_STRING_CONFIG, "r");
-			if (conf == NULL) SaveSettingsOrComplain(hWnd);
-			else ReadSettingsOrComplain(hWnd);
-			fclose(conf);
+			std::fstream fs (VERSUSE_STRING_CONFIG, std::ifstream::in);
+			if (fs.good()) ReadSaveOrComplain(hWnd);
+			else WriteSaveOrComplain(hWnd);
+			fs.close();
 			
-			DisplaySettings(hWnd);
+			WriteDisplay(hWnd);
 		}
 		break;
 		case WM_COMMAND:
 			switch(LOWORD(wParam)) {
 				case VERSUSE_BUTTON_WRITE:
 					ReadDisplay(hWnd);
-					SaveSettingsOrComplain(hWnd);
+					WriteSaveOrComplain(hWnd);
 					WriteTextOrComplain(hWnd);
 				break;
 				default:
@@ -100,51 +93,16 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return acted;
 }
 
-int ReadSettings() {
-	char buf[41] = {0};
-	FILE *fp = fopen(VERSUSE_STRING_CONFIG, "r");
-	if (fp == NULL) return -1;
-	if (fgets(buf, 41, fp) == NULL) return 1;
-	if (sscanf(buf, "%[^\n]\n", outfile) != 1) return 2;
-	if (fgets(buf, 41, fp) == NULL) return 3;
-	if (sscanf(buf, "%d %d %d %d\n", &outw, &alignL, &alignR, &mono) != 4) return 4;
-	if (fgets(buf, 41, fp) == NULL) return 5;
-	if (sscanf(buf, "%[^\n]\n", leftname) != 1) leftname[0] = '\0';
-	if (fgets(buf, 41, fp) == NULL) return 7;
-	if (sscanf(buf, "%[^\n]\n", leftscore) != 1) {
-		leftscore[0] = '0';
-		leftscore[1] = '\0';
-	}
-	if (fgets(buf, 41, fp) == NULL) return 9;
-	if (sscanf(buf, "%[^\n]\n", rightname) != 1) rightname[0] = '\0';
-	if (fgets(buf, 41, fp) == NULL) return 11;
-	if (sscanf(buf, "%[^\n]\n", rightscore) != 1) {
-		rightscore[0] = '0';
-		rightscore[1] = '\0';
-	}
-	
-	return 0;
-}
-
-int SaveSettings() {
-	FILE *fp = fopen(VERSUSE_STRING_CONFIG, "w");
-	if (fp == NULL) return -1;
-	fprintf(fp, VERSUSE_STRING_CONFIG_FORMAT, VERSUSE_LIST_CONFIG_VARS_SET);
-	fclose(fp);
-	return 0;
-}
-
 void LoadDefaults() {
+	outfile = "versuse-out.txt";
 	outw = 69;
 	alignL = 2;
 	alignR = 2;
-	leftname[0] = '\0';
-	leftscore[0] = '0';
-	leftscore[1] = '\0';
-	rightname[0] = '\0';
-	rightscore[0] = '0';
-	rightscore[1] = '\0';
 	mono = 0;
+	leftname = "";
+	leftscore = "0";
+	rightname = "";
+	rightscore = "0";
 }
 
 //this function is what everything else is wrapping, and it is a sloppy mess
@@ -152,9 +110,9 @@ int WriteText() {
 	int n = outw;
 	int leftA = alignL;
 	int rightA = alignR;
-	int leftW = strlen(leftname);
-	int rightW = strlen(rightname);
-	char *out = (char*)malloc(sizeof(char) * (n + 1));
+	int leftW = leftname.size();
+	int rightW = rightname.size();
+	char* out = (char*)malloc(sizeof(char) * (n + 1));
 	int loc = 0;
 	int center = n / 2;
 	if (n % 2) ++center;
@@ -193,18 +151,18 @@ int WriteText() {
 	}
 	while (rightname[i] != '\0') out[loc + j++] = rightname[i++];
 	
-	loc = center - (mono?0:1) - strlen(leftscore);
+	loc = center - (mono?0:1) - leftscore.size();
 	j = (i = 0);
 	while (leftscore[i] != '\0') out[loc + j++] = leftscore[i++];
 	
-	loc = center + (mono?1:2) + MaxNum(strlen(leftscore), strlen(rightscore)) - strlen(rightscore);
+	loc = center + (mono?1:2) + MaxNum(leftscore.size(), rightscore.size()) - rightscore.size();
 	j = (i = 0);
 	while (rightscore[i] != '\0') out[loc + j++] = rightscore[i++];
 	
 	out[center] = '-';
 	out[n] = '\0';
 	
-	FILE *fp = fopen(outfile, "w");
+	FILE *fp = fopen(outfile.c_str(), "w");
 	if (fp == NULL) return 1;
 	else {
 		fprintf(fp, "%s", out);
@@ -214,17 +172,26 @@ int WriteText() {
 	return 0;
 }
 
-void DisplaySettings(HWND hWnd) {
-	if (alignL == 1) SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_LEFT_L), BM_SETCHECK, BST_CHECKED, 0);
-	if (alignL == 2) SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_LEFT_C), BM_SETCHECK, BST_CHECKED, 0);
-	if (alignL == 3) SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_LEFT_R), BM_SETCHECK, BST_CHECKED, 0);
-	if (alignR == 1) SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_RIGHT_L), BM_SETCHECK, BST_CHECKED, 0);
-	if (alignR == 2) SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_RIGHT_C), BM_SETCHECK, BST_CHECKED, 0);
-	if (alignR == 3) SendMessage(GetDlgItem(hWnd, VERSUSE_OPTION_RIGHT_R), BM_SETCHECK, BST_CHECKED, 0);
-	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), leftname);
-	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore);
-	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname);
-	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore);
+void WriteDisplay(HWND hWnd) {
+	int t = VERSUSE_OPTION_LEFT_C;
+	if (alignL == 1) t = VERSUSE_OPTION_LEFT_L;
+	if (alignL == 3) t = VERSUSE_OPTION_LEFT_R;
+	SendMessage(GetDlgItem(hWnd, t), BM_SETCHECK, BST_CHECKED, 0);
+	t = VERSUSE_OPTION_RIGHT_C;
+	if (alignR == 1) t = VERSUSE_OPTION_RIGHT_L;
+	if (alignR == 3) t = VERSUSE_OPTION_RIGHT_R;
+	SendMessage(GetDlgItem(hWnd, t), BM_SETCHECK, BST_CHECKED, 0);
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), leftname.c_str());
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore.c_str());
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname.c_str());
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore.c_str());
+}
+
+void ReadWndToStr(HWND ref, std::string* dest) {
+	int buflen = GetWindowTextLength(ref) + 1;
+	(*dest).resize(buflen);
+	GetWindowText(ref, &((*dest)[0]), buflen);
+	(*dest).resize(buflen - 1);
 }
 
 void ReadDisplay(HWND hWnd) {
@@ -234,9 +201,49 @@ void ReadDisplay(HWND hWnd) {
 	if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_RIGHT_L)) alignR = 1;
 	else if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_RIGHT_R)) alignR = 3;
 	else alignR = 2;
+		
+	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), &leftname);
+	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), &leftscore);
+	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), &rightname);
+	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), &rightscore);
+}
+
+int WriteSave() {
+	std::fstream fs (VERSUSE_STRING_CONFIG, std::fstream::out);
+	if (!fs) return -1;
 	
-	GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), leftname, 41);
-	GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore, 4);
-	GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname, 41);
-	GetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore, 4);
+	fs << outfile << "\n" 
+	   << outw << " " << alignL << " " << alignR << " " << mono << "\n"
+	   << leftname << "\n"
+	   << leftscore << "\n"
+	   << rightname << "\n"
+	   << rightscore << "\n";
+	   << "Really long entries might break text output" << std::endl;
+	   
+	fs.close();
+	return 0;
+}
+
+int ReadSave() {
+	std::fstream fs (VERSUSE_STRING_CONFIG, std::fstream::in);
+	if (!fs) return -1;
+	
+	std::string line;
+	
+	if (!std::getline(fs, line)) return 1;
+	outfile = line;
+	if (!std::getline(fs, line)) return 3;
+	if (sscanf(line.c_str(), "%d %d %d %d\n", &outw, &alignL, &alignR, &mono) != 4) return 4;	
+	if (!std::getline(fs, line)) return 5;
+	leftname = line;
+	if (!std::getline(fs, line)) return 7;
+	if (line.length() == 0) line = "0";
+	leftscore = line;
+	if (!std::getline(fs, line)) return 9;
+	rightname = line;
+	if (!std::getline(fs, line)) return 11;
+	if (line.length() == 0) line = "0";
+	rightscore = line;
+	
+	return 0;
 }
