@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "versuse-main.hpp"
+#include "versuse.hpp"
 
 VERSUSE_ICON ICON gc_ico2.ico
 /*

@@ -2,16 +2,8 @@
 #include <string>
 #include <fstream>
 
+#include "versuse.hpp"
 #include "versuse-main.hpp"
-
-BOOL CALLBACK DialogProc(HWND, UINT, WPARAM, LPARAM);
-
-void LoadDefaults();
-int WriteSave();
-int ReadSave();
-int WriteText();
-void WriteDisplay(HWND);
-void ReadDisplay(HWND);
 
 int MaxNum(int a, int b) { return (a > b ? a : b); }
 int MinNum(int a, int b) { return (a < b ? a : b); }
