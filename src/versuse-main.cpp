@@ -217,7 +217,7 @@ int WriteSave() {
 	   << leftname << "\n"
 	   << leftscore << "\n"
 	   << rightname << "\n"
-	   << rightscore << "\n";
+	   << rightscore << "\n"
 	   << "Really long entries might break text output" << std::endl;
 	   
 	fs.close();

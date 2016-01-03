@@ -4,9 +4,9 @@
 /*
 * in the land of defines everyone is sad
 */
-#define VERSUSE_STRING_VERSION "v2.1"
-#define VERSUSE_RES_VERSION 2,1,0,0
-#define VERSUSE_RES_VERSION2 "2.1"
+#define VERSUSE_STRING_VERSION "v2.2"
+#define VERSUSE_RES_VERSION 2,2,0,0
+#define VERSUSE_RES_VERSION2 "2.2"
 
 #define VERSUSE_MAIN 150
 #define VERSUSE_ICON 151
