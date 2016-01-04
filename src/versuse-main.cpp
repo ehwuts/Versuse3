@@ -9,7 +9,9 @@ int MaxNum(int a, int b) { return (a > b ? a : b); }
 int MinNum(int a, int b) { return (a < b ? a : b); }
 
 void WriteSaveOrComplain(HWND hWnd) { if (WriteSave()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
-void ReadSaveOrComplain(HWND hWnd) { if (ReadSave()) MessageBox(hWnd, "Problem reading existing config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
+void ReadSaveOrComplain(HWND hWnd) {
+	if (int i = ReadSave()) MessageBox(hWnd, (i<0?"Problem reading existing config.":"Problem after partially reading config."), "Err", MB_ICONEXCLAMATION|MB_OK);
+}
 void WriteTextOrComplain(HWND hWnd) { if (WriteText()) MessageBox(hWnd, "Failed to save display text.", "Welp", MB_OK|MB_ICONERROR); }
 
 // GLOBALS EVERYWHERE GLOBALS
@@ -214,7 +216,6 @@ int WriteSave() {
 	   << leftscore << "\n"
 	   << rightname << "\n"
 	   << rightscore << "\n"
-	   << "Really long entries might break output" << "\n"
 	   << fontname << "\n"
 	   << fontpix << std::endl;
 	   
@@ -227,11 +228,12 @@ int ReadSave() {
 	if (!fs) return -1;
 	
 	std::string line;
-	int i;
 	
+	if (!std::getline(fs, line)) return -1;
 	if (!std::getline(fs, line)) return 1;
 	outfile = line;
 	if (!std::getline(fs, line)) return 3;
+	int i;
 	if ((i = sscanf(line.c_str(), "%d %d %d %d %d\n", &outw, &alignL, &alignR, &mono, &png)) < 3) return 4;
 	if (i < 4) mono = 0;
 	if (i < 5) png = 0;
