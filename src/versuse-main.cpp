@@ -13,8 +13,8 @@ void ReadSaveOrComplain(HWND hWnd) { if (ReadSave()) MessageBox(hWnd, "Problem r
 void WriteTextOrComplain(HWND hWnd) { if (WriteText()) MessageBox(hWnd, "Failed to save display text.", "Welp", MB_OK|MB_ICONERROR); }
 
 // GLOBALS EVERYWHERE GLOBALS
-std::string outfile, leftname, leftscore, rightname, rightscore;
-int outw, alignL, alignR, mono;
+std::string outfile, leftname, leftscore, rightname, rightscore, fontname, fontpix;
+int outw, alignL, alignR, mono, png;
 
 HINSTANCE hInst = 0;
 
@@ -92,10 +92,13 @@ void LoadDefaults() {
 	alignL = 2;
 	alignR = 2;
 	mono = 0;
+	png = 0;
 	leftname = "";
 	leftscore = "0";
 	rightname = "";
 	rightscore = "0";
+	fontname = "Consolas";
+	fontpix = "12";
 }
 
 //this function is what everything else is wrapping, and it is a sloppy mess
@@ -206,12 +209,14 @@ int WriteSave() {
 	if (!fs) return -1;
 	
 	fs << outfile << "\n" 
-	   << outw << " " << alignL << " " << alignR << " " << mono << "\n"
+	   << outw << " " << alignL << " " << alignR << " " << mono << " " << png << "\n"
 	   << leftname << "\n"
 	   << leftscore << "\n"
 	   << rightname << "\n"
 	   << rightscore << "\n"
-	   << "Really long entries might break text output" << std::endl;
+	   << "Really long entries might break output" << "\n"
+	   << fontname << "\n"
+	   << fontpix << std::endl;
 	   
 	fs.close();
 	return 0;
@@ -222,11 +227,14 @@ int ReadSave() {
 	if (!fs) return -1;
 	
 	std::string line;
+	int i;
 	
 	if (!std::getline(fs, line)) return 1;
 	outfile = line;
 	if (!std::getline(fs, line)) return 3;
-	if (sscanf(line.c_str(), "%d %d %d %d\n", &outw, &alignL, &alignR, &mono) != 4) return 4;	
+	if ((i = sscanf(line.c_str(), "%d %d %d %d %d\n", &outw, &alignL, &alignR, &mono, &png)) < 3) return 4;
+	if (i < 4) mono = 0;
+	if (i < 5) png = 0;
 	if (!std::getline(fs, line)) return 5;
 	leftname = line;
 	if (!std::getline(fs, line)) return 7;
@@ -237,6 +245,10 @@ int ReadSave() {
 	if (!std::getline(fs, line)) return 11;
 	if (line.length() == 0) line = "0";
 	rightscore = line;
+	if (!std::getline(fs, line)) return 13;
+	fontname = line;
+	if (!std::getline(fs, line)) return 15;
+	fontpix = line;
 	
 	return 0;
 }
