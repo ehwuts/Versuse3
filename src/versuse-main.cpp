@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <string>
+#include <sstream>
 #include <fstream>
 
 #include "versuse.hpp"
@@ -183,6 +184,11 @@ void WriteDisplay(HWND hWnd) {
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore.c_str());
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname.c_str());
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore.c_str());
+	
+	
+	std::stringstream ss;
+	ss << outw;
+	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_TEXTWIDTH), ss.str().c_str());
 }
 
 void ReadWndToStr(HWND ref, std::string* dest) {
@@ -204,6 +210,12 @@ void ReadDisplay(HWND hWnd) {
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), &leftscore);
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), &rightname);
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), &rightscore);
+	
+	std::string buf;
+	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_TEXTWIDTH), &buf);
+	std::stringstream buf2;
+	buf2 << buf;
+	buf2 >> outw;
 }
 
 int WriteSave() {
