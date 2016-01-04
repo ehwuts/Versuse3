@@ -229,7 +229,6 @@ int ReadSave() {
 	
 	std::string line;
 	
-	if (!std::getline(fs, line)) return -1;
 	if (!std::getline(fs, line)) return 1;
 	outfile = line;
 	if (!std::getline(fs, line)) return 3;
