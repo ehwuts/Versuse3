@@ -16,8 +16,8 @@ void ReadSaveOrComplain(HWND hWnd) {
 void WriteTextOrComplain(HWND hWnd) { if (WriteText()) MessageBox(hWnd, "Failed to save display text.", "Welp", MB_OK|MB_ICONERROR); }
 
 // GLOBALS EVERYWHERE GLOBALS
-std::string outfile, leftname, leftscore, rightname, rightscore, fontname, fontpix;
-int outw, alignL, alignR, mono, png;
+std::string outfile, leftname, leftscore, rightname, rightscore;
+int outw, alignL, alignR;
 
 HINSTANCE hInst = 0;
 
@@ -94,14 +94,10 @@ void LoadDefaults() {
 	outw = 69;
 	alignL = 2;
 	alignR = 2;
-	mono = 0;
-	png = 0;
 	leftname = "";
 	leftscore = "0";
 	rightname = "";
 	rightscore = "0";
-	fontname = "Consolas";
-	fontpix = "12";
 }
 
 //this function is what everything else is wrapping, and it is a sloppy mess
@@ -150,11 +146,11 @@ int WriteText() {
 	}
 	while (rightname[i] != '\0') out[loc + j++] = rightname[i++];
 	
-	loc = center - (mono?0:1) - leftscore.size();
+	loc = center - leftscore.size();
 	j = (i = 0);
 	while (leftscore[i] != '\0') out[loc + j++] = leftscore[i++];
 	
-	loc = center + (mono?1:2) + MaxNum(leftscore.size(), rightscore.size()) - rightscore.size();
+	loc = center + 1 + MaxNum(leftscore.size(), rightscore.size()) - rightscore.size();
 	j = (i = 0);
 	while (rightscore[i] != '\0') out[loc + j++] = rightscore[i++];
 	
@@ -223,13 +219,11 @@ int WriteSave() {
 	if (!fs) return -1;
 	
 	fs << outfile << "\n" 
-	   << outw << " " << alignL << " " << alignR << " " << mono << " " << png << "\n"
+	   << outw << " " << alignL << " " << alignR << "\n"
 	   << leftname << "\n"
 	   << leftscore << "\n"
 	   << rightname << "\n"
-	   << rightscore << "\n"
-	   << fontname << "\n"
-	   << fontpix << std::endl;
+	   << rightscore << std::endl;
 	   
 	fs.close();
 	return 0;
@@ -245,9 +239,7 @@ int ReadSave() {
 	outfile = line;
 	if (!std::getline(fs, line)) return 3;
 	int i;
-	if ((i = sscanf(line.c_str(), "%d %d %d %d %d\n", &outw, &alignL, &alignR, &mono, &png)) < 3) return 4;
-	if (i < 4) mono = 0;
-	if (i < 5) png = 0;
+	if ((i = sscanf(line.c_str(), "%d %d %d\n", &outw, &alignL, &alignR)) < 3) return 4;
 	if (!std::getline(fs, line)) return 5;
 	leftname = line;
 	if (!std::getline(fs, line)) return 7;
@@ -258,10 +250,6 @@ int ReadSave() {
 	if (!std::getline(fs, line)) return 11;
 	if (line.length() == 0) line = "0";
 	rightscore = line;
-	if (!std::getline(fs, line)) return 13;
-	fontname = line;
-	if (!std::getline(fs, line)) return 15;
-	fontpix = line;
 	
 	return 0;
 }
