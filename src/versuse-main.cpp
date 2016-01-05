@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <vector>
 
 #include "versuse.hpp"
 #include "versuse-main.hpp"
@@ -11,13 +12,15 @@ int MinNum(int a, int b) { return (a < b ? a : b); }
 
 void WriteSaveOrComplain(HWND hWnd) { if (WriteSave()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
 void ReadSaveOrComplain(HWND hWnd) {
-	if (int i = ReadSave()) MessageBox(hWnd, (i<0?"Problem reading existing config.":"Problem after partially reading config."), "Err", MB_ICONEXCLAMATION|MB_OK);
+	if (int i = ReadSave()) MessageBox(hWnd, (i<0?"No brackets in file. Loaded defaults.":"Problem after partially reading config."), "Err", MB_ICONEXCLAMATION|MB_OK);
 }
 void WriteTextOrComplain(HWND hWnd) { if (WriteText()) MessageBox(hWnd, "Failed to save display text.", "Welp", MB_OK|MB_ICONERROR); }
 
 // GLOBALS EVERYWHERE GLOBALS
-std::string outfile, leftname, leftscore, rightname, rightscore;
+std::string outfile, leftname, leftscore, rightname, rightscore, outfile2;
 int outw, alignL, alignR;
+
+std::vector< std::string > brackets;
 
 HINSTANCE hInst = 0;
 
@@ -60,10 +63,14 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			
 			std::fstream fs (VERSUSE_STRING_CONFIG, std::ifstream::in);
 			if (fs.good()) ReadSaveOrComplain(hWnd);
-			else WriteSaveOrComplain(hWnd);
+			else {
+				DefaultBrackets();
+				WriteSaveOrComplain(hWnd);
+			}
 			fs.close();
 			
 			WriteDisplay(hWnd);
+			DisplayBrackets(GetDlgItem(hWnd, VERSUSE_CBOX_BRACKET));
 		}
 		break;
 		case WM_COMMAND:
@@ -98,6 +105,21 @@ void LoadDefaults() {
 	leftscore = "0";
 	rightname = "";
 	rightscore = "0";
+	outfile2 = "versuse-brackout.txt";
+}
+
+void DefaultBrackets() {
+	brackets.erase(brackets.end(), brackets.begin());
+	brackets.push_back("Winners Bracket");
+	brackets.push_back("Losers Bracket");
+	brackets.push_back("Winners Quarters");
+	brackets.push_back("Losers Quarters");
+	brackets.push_back("Winners Semis");
+	brackets.push_back("Losers Semis");
+	brackets.push_back("Winners Semis");
+	brackets.push_back("Losers Semis");
+	brackets.push_back("Semifinals");
+	brackets.push_back("Grand Finals");
 }
 
 //this function is what everything else is wrapping, and it is a sloppy mess
@@ -180,11 +202,19 @@ void WriteDisplay(HWND hWnd) {
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore.c_str());
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname.c_str());
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore.c_str());
-	
-	
+		
 	std::stringstream ss;
 	ss << outw;
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_TEXTWIDTH), ss.str().c_str());
+}
+
+void DisplayBrackets(HWND ref) {
+	std::vector< std::string >::iterator it = brackets.begin();
+	while (it != brackets.end()) {
+		SendMessage(ref, (UINT)CB_ADDSTRING, (WPARAM)0,(LPARAM)((*it).c_str()));
+		++it;
+	}
+	SendMessage(ref, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
 }
 
 void ReadWndToStr(HWND ref, std::string* dest) {
@@ -223,7 +253,16 @@ int WriteSave() {
 	   << leftname << "\n"
 	   << leftscore << "\n"
 	   << rightname << "\n"
-	   << rightscore << std::endl;
+	   << rightscore << "\n"
+	   << outfile2;
+
+	std::vector< std::string >::iterator it = brackets.begin();
+	while (it != brackets.end()) {
+		fs << "\n" << (*it);
+		++it;
+	}
+	
+	fs << std::endl;
 	   
 	fs.close();
 	return 0;
@@ -250,6 +289,13 @@ int ReadSave() {
 	if (!std::getline(fs, line)) return 11;
 	if (line.length() == 0) line = "0";
 	rightscore = line;
+	if (!std::getline(fs, line)) return 13;
+	outfile2 = line;
+	while (std::getline(fs, line)) brackets.push_back(line);
+	if (brackets.empty()) {
+		DefaultBrackets();
+		return -15;
+	}
 	
 	return 0;
 }
