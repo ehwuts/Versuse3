@@ -8,6 +8,7 @@ void DefaultBrackets();
 int WriteSave();
 int ReadSave();
 int WriteText();
+int WriteBracket();
 void WriteDisplay(HWND);
 void ReadDisplay(HWND);
 void DisplayBrackets(HWND);
