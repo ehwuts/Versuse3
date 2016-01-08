@@ -4,10 +4,10 @@
 /*
 * in the land of defines everyone is sad
 */
-#define VERSUSE_STRING_VERSION "v2.4"
-#define VERSUSE_RES_VERSION 2,4,0,0
-#define VERSUSE_RES_VERSION2 "2.4"
-#define VERSUSE_STRING_CONFIG "versuse-conf2.txt"
+#define VERSUSE_STRING_VERSION "v3.1"
+#define VERSUSE_RES_VERSION 3,1,0,0
+#define VERSUSE_RES_VERSION2 "3.1"
+#define VERSUSE_STRING_CONFIG "versuse-conf3.txt"
 
 #define VERSUSE_MAIN 150
 #define VERSUSE_ICON 151

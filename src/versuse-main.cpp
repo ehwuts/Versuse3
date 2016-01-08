@@ -19,7 +19,7 @@ void WriteBracketOrComplain(HWND hWnd) { if (WriteBracket()) MessageBox(hWnd, "F
 
 // GLOBALS EVERYWHERE GLOBALS
 std::string outfile, outfile2, leftname, leftscore, rightname, rightscore, brackconf, nameconf;
-int outw, alignL, alignR, presnum;
+int outw, alignL, alignR, mono;
 
 int bracksel, playersel, playersel2, scoresel, scoresel2;
 
@@ -64,20 +64,72 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			
 			LoadDefaults();
 			
-			std::fstream fs (VERSUSE_STRING_CONFIG, std::ifstream::in);
-			if (fs.good()) ReadSaveOrComplain(hWnd);
-			else {
-				DefaultBrackets();
-				WriteSaveOrComplain(hWnd);
+			{
+				std::fstream fs (VERSUSE_STRING_CONFIG, std::ifstream::in);
+				if (fs.good()) ReadSaveOrComplain(hWnd);
+				else WriteSaveOrComplain(hWnd);
+				fs.close();
 			}
-			fs.close();
+			{
+				std::fstream fs (brackconf.c_str(), std::ifstream::in);
+				if (fs.good()) {
+					std::string line;
+					while (std::getline(fs, line)) brackets.push_back(line);					
+				}
+				if (brackets.size() == 0) {
+					DefaultBrackets();
+					WriteBracketFile();
+				}
+				fs.close();	
+
+				if (bracksel < 0) bracksel = 0;
+				if ((unsigned)bracksel >= brackets.size()) bracksel = brackets.size() - 1;
+			}
+			{
+				std::fstream fs (nameconf.c_str(), std::ifstream::in);
+				if (fs.good()) {
+					std::string line;
+					while (std::getline(fs, line)) players.push_back(line);					
+				}
+				if (players.size() < 2) WritePlayerFile();
+				fs.close();			
+				
+				if (playersel < 0) playersel = 0;
+				if (playersel2 < 0) playersel2 = 0;
+				if ((unsigned)playersel >= players.size()) playersel = players.size() - 1;
+				if ((unsigned)playersel2 >= players.size()) playersel2 = players.size() - 1;
+			}
 			
 			WriteDisplay(hWnd);
 			DisplayBrackets(GetDlgItem(hWnd, VERSUSE_CBOX_BRACKET));
+			DisplayNames(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTNAME), GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME));
+			DisplayScores(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTSCORE));
 		}
 		break;
 		case WM_COMMAND:
-			switch(LOWORD(wParam)) {
+			if (HIWORD(wParam) == CBN_SELCHANGE) {
+				switch(LOWORD(wParam)) {
+					case VERSUSE_CBOX_LEFTNAME:
+						playersel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTNAME), CB_GETCURSEL, 0, 0);
+						leftname = players[playersel];
+					break;
+					case VERSUSE_CBOX_LEFTSCORE:
+						scoresel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), CB_GETCURSEL, 0, 0);
+						leftscore = scores[scoresel];
+					break;
+					case VERSUSE_CBOX_RIGHTNAME:
+						playersel2 = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME), CB_GETCURSEL, 0, 0);
+						rightname = players[playersel2];
+					break;
+					case VERSUSE_CBOX_RIGHTSCORE:
+						scoresel2 = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTSCORE), CB_GETCURSEL, 0, 0);
+						rightscore = scores[scoresel2];
+					break;
+					default:
+						acted = false;
+				}
+				WriteDisplay(hWnd);
+			} else switch(LOWORD(wParam)) {
 				case VERSUSE_BUTTON_WRITE:
 					ReadDisplay(hWnd);
 					WriteSaveOrComplain(hWnd);
@@ -100,12 +152,31 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return acted;
 }
 
+void DefaultNumbers() {
+	scores.erase(brackets.end(), brackets.begin());
+	scores.push_back("0");
+	scores.push_back("1");
+	scores.push_back("2");
+	scores.push_back("3");
+	scores.push_back("4");
+	scores.push_back("5");
+	scoresel = 0;
+	scoresel2 = 0;
+}
+
+void DefaultNames() {
+	players.erase(brackets.end(), brackets.begin());
+	players.push_back("");
+	playersel = 0;
+	playersel2 = 0;
+}
+
 void LoadDefaults() {
 	outfile = "versuse-out.txt";
 	outw = 69;
 	alignL = 2;
 	alignR = 2;
-	dropsel = 0;
+	mono = 0;
 	leftname = "";
 	leftscore = "0";
 	rightname = "";
@@ -113,6 +184,8 @@ void LoadDefaults() {
 	outfile2 = "versuse-brackout.txt";
 	brackconf = "versuse-brackconf.txt";
 	nameconf = "versuse-names.txt";
+	DefaultNames();
+	DefaultNumbers();
 }
 
 void DefaultBrackets() {
@@ -127,13 +200,14 @@ void DefaultBrackets() {
 	brackets.push_back("Losers Semis");
 	brackets.push_back("Semifinals");
 	brackets.push_back("Grand Finals");
+	bracksel = 0;
 }
 
 int WriteBracket() {
 	std::fstream fs (outfile2.c_str(), std::fstream::out);
 	if (!fs) return -1;
 	
-	fs << brackets[dropsel] << " ";
+	fs << brackets[bracksel] << " ";
 	fs.flush();
 	
 	fs.close();
@@ -186,11 +260,11 @@ int WriteText() {
 	}
 	while (rightname[i] != '\0') out[loc + j++] = rightname[i++];
 	
-	loc = center - leftscore.size();
+	loc = center - (mono?0:1)  - leftscore.size();
 	j = (i = 0);
 	while (leftscore[i] != '\0') out[loc + j++] = leftscore[i++];
 	
-	loc = center + 1 + MaxNum(leftscore.size(), rightscore.size()) - rightscore.size();
+	loc = center + (mono?1:2) + MaxNum(leftscore.size(), rightscore.size()) - rightscore.size();
 	j = (i = 0);
 	while (rightscore[i] != '\0') out[loc + j++] = rightscore[i++];
 	
@@ -220,10 +294,11 @@ void WriteDisplay(HWND hWnd) {
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore.c_str());
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname.c_str());
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore.c_str());
-		
+		/*
 	std::stringstream ss;
 	ss << outw;
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_TEXTWIDTH), ss.str().c_str());
+	*/
 }
 
 void ReadWndToStr(HWND ref, std::string* dest) {
@@ -245,14 +320,14 @@ void ReadDisplay(HWND hWnd) {
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), &leftscore);
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), &rightname);
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), &rightscore);
-	
+	/*
 	std::string buf;
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_TEXTWIDTH), &buf);
 	std::stringstream buf2;
 	buf2 << buf;
 	buf2 >> outw;
-	
-	dropsel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_BRACKET), CB_GETCURSEL, 0, 0);
+	*/
+	bracksel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_BRACKET), CB_GETCURSEL, 0, 0);
 	/*
 	int buflen = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_BRACKET), CB_GETLBTEXTLEN, dropsel, 0) + 1;
 	buf.resize(buflen);
@@ -262,33 +337,75 @@ void ReadDisplay(HWND hWnd) {
 	*/
 }
 
-int WriteSave() {
-	std::fstream fs (VERSUSE_STRING_CONFIG, std::fstream::out);
+int WriteBracketFile() {
+	std::fstream fs (brackconf.c_str(), std::fstream::out);
 	if (!fs) return -1;
 	
-	fs << outfile << "\n" 
-	   << outw << " " << alignL << " " << alignR << " " << dropsel << "\n"
-	   << leftname << "\n"
-	   << leftscore << "\n"
-	   << rightname << "\n"
-	   << rightscore << "\n"
-	   << outfile2;
-
 	std::vector< std::string >::iterator it = brackets.begin();
 	while (it != brackets.end()) {
-		fs << "\n" << (*it);
+		fs << (*it) << "\n";
 		++it;
 	}
 	
+	fs.flush();	
+	
+	fs.close();
+	return 0;
+}
+int WritePlayerFile() {
+	std::fstream fs (nameconf.c_str(), std::fstream::out);
+	if (!fs) return -1;
+	
 	fs << std::endl;
-	   
+	
 	fs.close();
 	return 0;
 }
 
-int FillDropdownFromFile(std::string name, std::vector< string > list) {
-	std::fstream fs (name.c_str(), std::fstream::in);
+int WriteSave() {
+	std::fstream fs (VERSUSE_STRING_CONFIG, std::fstream::out);
 	if (!fs) return -1;
+	
+	fs << outw << " " << alignL << " " << alignR << " " << bracksel << " " << playersel << " " << scoresel << " " << playersel2 << " " << scoresel2 << " " << mono << "\n"
+	   << leftname << "\n"
+	   << leftscore << "\n"
+	   << rightname << "\n"
+	   << rightscore << "\n"
+	   << outfile << "\n" 
+	   << outfile2 << "\n"
+	   << brackconf << "\n"
+	   << nameconf << std::endl;
+	   
+	return 0;
+}
+
+void DisplayBrackets(HWND ref) {
+       std::vector< std::string >::iterator it = brackets.begin();
+       while (it != brackets.end()) {
+               SendMessage(ref, (UINT)CB_ADDSTRING, (WPARAM)0,(LPARAM)((*it).c_str()));
+               ++it;
+       }
+       SendMessage(ref, CB_SETCURSEL, bracksel, 0);// != dropsel)MessageBox(NULL, "BRACKET A.", "Rip", MB_OK|MB_ICONERROR);
+}
+void DisplayNames(HWND ref, HWND ref2) {
+       std::vector< std::string >::iterator it = players.begin();
+       while (it != players.end()) {
+               SendMessage(ref, (UINT)CB_ADDSTRING, (WPARAM)0,(LPARAM)((*it).c_str()));
+               SendMessage(ref2, (UINT)CB_ADDSTRING, (WPARAM)0,(LPARAM)((*it).c_str()));
+               ++it;
+       }
+       SendMessage(ref, CB_SETCURSEL, playersel, 0);
+       SendMessage(ref2, CB_SETCURSEL, playersel2, 0);
+}
+void DisplayScores(HWND ref, HWND ref2) {
+       std::vector< std::string >::iterator it = scores.begin();
+       while (it != scores.end()) {
+               SendMessage(ref, (UINT)CB_ADDSTRING, (WPARAM)0,(LPARAM)((*it).c_str()));
+               SendMessage(ref2, (UINT)CB_ADDSTRING, (WPARAM)0,(LPARAM)((*it).c_str()));
+               ++it;
+       }
+       SendMessage(ref, CB_SETCURSEL, scoresel, 0);
+       SendMessage(ref2, CB_SETCURSEL, scoresel2, 0);
 }
 
 int ReadSave() {
@@ -297,17 +414,16 @@ int ReadSave() {
 	
 	std::string line;
 	
-	if (!std::getline(fs, line)) return 1;
-	outfile = line;
 	if (!std::getline(fs, line)) return 3;
 	int i;
-	if ((i = sscanf(line.c_str(), "%d %d %d %d\n", &outw, &alignL, &alignR, &bracksel, &playersel, &scoresel, &playersel2, &scoresel2)) < 3) return 4;
+	if ((i = sscanf(line.c_str(), "%d %d %d %d %d %d %d %d %d\n", &outw, &alignL, &alignR, &bracksel, &playersel, &scoresel, &playersel2, &scoresel2, &mono)) < 3) return 4;
 	switch(i) {
 		case 3: bracksel = 0;
 		case 4:	playersel = 0;
 		case 5:	scoresel = 0;
 		case 6:	playersel2 = 0;
 		case 7:	scoresel2 = 0;
+		case 8: mono = 0;
 	}
 	if (!std::getline(fs, line)) return 5;
 	leftname = line;
@@ -319,19 +435,14 @@ int ReadSave() {
 	if (!std::getline(fs, line)) return 11;
 	if (line.length() == 0) line = "0";
 	rightscore = line;
+	if (!std::getline(fs, line)) return 1;
+	outfile = line;
 	if (!std::getline(fs, line)) return 13;
 	outfile2 = line;
 	if (!std::getline(fs, line)) return 15;
 	brackconf = line;
 	if (!std::getline(fs, line)) return 17;
 	nameconf = line;
-	
-	
-	while (std::getline(fs, line)) brackets.push_back(line);
-	if (brackets.empty()) {
-		DefaultBrackets();
-		return -15;
-	}
 	
 	return 0;
 }
