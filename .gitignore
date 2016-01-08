@@ -1,4 +1,3 @@
 src/*.o
 src/*.res
-versuse-conf.txt
-versuse-out.txt
+*.txt

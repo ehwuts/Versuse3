@@ -15,13 +15,14 @@ void ReadSaveOrComplain(HWND hWnd) {
 	if (int i = ReadSave()) MessageBox(hWnd, (i<0?"No brackets in file. Loaded defaults.":"Problem after partially reading config."), "Err", MB_ICONEXCLAMATION|MB_OK);
 }
 void WriteTextOrComplain(HWND hWnd) { if (WriteText()) MessageBox(hWnd, "Failed to save display text.", "Welp", MB_OK|MB_ICONERROR); }
-void WriteBracketOrComplain(HWND hWnd) { if (WriteBracket()) MessageBox(hWnd, "Failed to save bracket text.", "Rip", MB_OK|MB_ICONERROR); }
 
 // GLOBALS EVERYWHERE GLOBALS
-std::string outfile, leftname, leftscore, rightname, rightscore, outfile2;
-int outw, alignL, alignR, dropsel;
+std::string outfile, outfile2, leftname, leftscore, rightname, rightscore, brackconf, nameconf;
+int outw, alignL, alignR, presnum;
 
-std::vector< std::string > brackets;
+int bracksel, playersel, playersel2, scoresel, scoresel2;
+
+std::vector< std::string > brackets, players, scores;
 
 HINSTANCE hInst = 0;
 
@@ -109,6 +110,8 @@ void LoadDefaults() {
 	rightname = "";
 	rightscore = "0";
 	outfile2 = "versuse-brackout.txt";
+	brackconf = "versuse-brackconf.txt";
+	nameconf = "versuse-names.txt";
 }
 
 void DefaultBrackets() {
@@ -222,17 +225,6 @@ void WriteDisplay(HWND hWnd) {
 	SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_TEXTWIDTH), ss.str().c_str());
 }
 
-void DisplayBrackets(HWND ref) {
-	std::vector< std::string >::iterator it = brackets.begin();
-	while (it != brackets.end()) {
-		SendMessage(ref, (UINT)CB_ADDSTRING, (WPARAM)0,(LPARAM)((*it).c_str()));
-		++it;
-	}
-	if (dropsel < 0) dropsel = 0;
-	else if ((unsigned)dropsel >= brackets.size()) dropsel = brackets.size() - 1;
-	SendMessage(ref, CB_SETCURSEL, dropsel, 0);// != dropsel)MessageBox(NULL, "BRACKET A.", "Rip", MB_OK|MB_ICONERROR);
-}
-
 void ReadWndToStr(HWND ref, std::string* dest) {
 	int buflen = GetWindowTextLength(ref) + 1;
 	(*dest).resize(buflen);
@@ -293,6 +285,11 @@ int WriteSave() {
 	return 0;
 }
 
+int FillDropdownFromFile(std::string name, std::vector< string > list) {
+	std::fstream fs (name.c_str(), std::fstream::in);
+	if (!fs) return -1;
+}
+
 int ReadSave() {
 	std::fstream fs (VERSUSE_STRING_CONFIG, std::fstream::in);
 	if (!fs) return -1;
@@ -303,8 +300,14 @@ int ReadSave() {
 	outfile = line;
 	if (!std::getline(fs, line)) return 3;
 	int i;
-	if ((i = sscanf(line.c_str(), "%d %d %d %d\n", &outw, &alignL, &alignR, &dropsel)) < 3) return 4;
-	if (i < 4) dropsel = 0;
+	if ((i = sscanf(line.c_str(), "%d %d %d %d\n", &outw, &alignL, &alignR, &bracksel, &playersel, &scoresel, &playersel2, &scoresel2)) < 3) return 4;
+	switch(i) {
+		case 3: bracksel = 0;
+		case 4:	playersel = 0;
+		case 5:	scoresel = 0;
+		case 6:	playersel2 = 0;
+		case 7:	scoresel2 = 0;
+	}
 	if (!std::getline(fs, line)) return 5;
 	leftname = line;
 	if (!std::getline(fs, line)) return 7;
@@ -317,6 +320,12 @@ int ReadSave() {
 	rightscore = line;
 	if (!std::getline(fs, line)) return 13;
 	outfile2 = line;
+	if (!std::getline(fs, line)) return 15;
+	brackconf = line;
+	if (!std::getline(fs, line)) return 17;
+	nameconf = line;
+	
+	
 	while (std::getline(fs, line)) brackets.push_back(line);
 	if (brackets.empty()) {
 		DefaultBrackets();
