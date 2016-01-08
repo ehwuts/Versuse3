@@ -15,6 +15,7 @@ void ReadSaveOrComplain(HWND hWnd) {
 	if (int i = ReadSave()) MessageBox(hWnd, (i<0?"No brackets in file. Loaded defaults.":"Problem after partially reading config."), "Err", MB_ICONEXCLAMATION|MB_OK);
 }
 void WriteTextOrComplain(HWND hWnd) { if (WriteText()) MessageBox(hWnd, "Failed to save display text.", "Welp", MB_OK|MB_ICONERROR); }
+void WriteBracketOrComplain(HWND hWnd) { if (WriteBracket()) MessageBox(hWnd, "Failed to save bracket text.", "Rip", MB_OK|MB_ICONERROR); }
 
 // GLOBALS EVERYWHERE GLOBALS
 std::string outfile, outfile2, leftname, leftscore, rightname, rightscore, brackconf, nameconf;
