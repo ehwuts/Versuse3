@@ -12,7 +12,7 @@ int MinNum(int a, int b) { return (a < b ? a : b); }
 
 void WriteSaveOrComplain(HWND hWnd) { if (WriteSave()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
 void ReadSaveOrComplain(HWND hWnd) {
-	if (int i = ReadSave()) MessageBox(hWnd, (i<0?"No brackets in file. Loaded defaults.":"Problem after partially reading config."), "Err", MB_ICONEXCLAMATION|MB_OK);
+	if (int i = ReadSave()) MessageBox(hWnd, (i<0?"No brackets in file. Loaded defaults.":"Problem reading existing config."), "Err", MB_ICONEXCLAMATION|MB_OK);
 }
 void WriteTextOrComplain(HWND hWnd) { if (WriteText()) MessageBox(hWnd, "Failed to save display text.", "Welp", MB_OK|MB_ICONERROR); }
 void WriteBracketOrComplain(HWND hWnd) { if (WriteBracket()) MessageBox(hWnd, "Failed to save bracket text.", "Rip", MB_OK|MB_ICONERROR); }
@@ -38,7 +38,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBox(NULL, "Window Creation Failed!", "Error! aaaaaaa!", MB_ICONEXCLAMATION|MB_OK);
 		return 0;
 	}
-
+	
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0) > 0) {
         if (!IsDialogMessage(hDiag, &msg)) {
@@ -63,7 +63,6 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			SendMessage(hWnd, DM_SETDEFID, VERSUSE_BUTTON_WRITE, 0);
 			
 			LoadDefaults();
-			
 			{
 				std::fstream fs (VERSUSE_STRING_CONFIG, std::ifstream::in);
 				if (fs.good()) ReadSaveOrComplain(hWnd);
@@ -282,6 +281,7 @@ int WriteText() {
 }
 
 void WriteDisplay(HWND hWnd) {
+
 	int t = VERSUSE_OPTION_LEFT_C;
 	if (alignL == 1) t = VERSUSE_OPTION_LEFT_L;
 	if (alignL == 3) t = VERSUSE_OPTION_LEFT_R;
@@ -315,7 +315,7 @@ void ReadDisplay(HWND hWnd) {
 	if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_RIGHT_L)) alignR = 1;
 	else if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_RIGHT_R)) alignR = 3;
 	else alignR = 2;
-		
+
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), &leftname);
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), &leftscore);
 	ReadWndToStr(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), &rightname);
@@ -365,7 +365,7 @@ int WritePlayerFile() {
 int WriteSave() {
 	std::fstream fs (VERSUSE_STRING_CONFIG, std::fstream::out);
 	if (!fs) return -1;
-	
+
 	fs << outw << " " << alignL << " " << alignR << " " << bracksel << " " << playersel << " " << scoresel << " " << playersel2 << " " << scoresel2 << " " << mono << "\n"
 	   << leftname << "\n"
 	   << leftscore << "\n"
