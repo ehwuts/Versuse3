@@ -102,7 +102,7 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			WriteDisplay(hWnd);
 			DisplayBrackets(GetDlgItem(hWnd, VERSUSE_CBOX_BRACKET));
 			DisplayNames(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTNAME), GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME));
-			DisplayScores(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTSCORE));
+			//DisplayScores(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTSCORE));
 		}
 		break;
 		case WM_COMMAND:
@@ -112,18 +112,20 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						playersel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTNAME), CB_GETCURSEL, 0, 0);
 						leftname = players[playersel];
 					break;
-					case VERSUSE_CBOX_LEFTSCORE:
-						scoresel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), CB_GETCURSEL, 0, 0);
-						leftscore = scores[scoresel];
-					break;
 					case VERSUSE_CBOX_RIGHTNAME:
 						playersel2 = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME), CB_GETCURSEL, 0, 0);
 						rightname = players[playersel2];
+					break;
+					/*
+					case VERSUSE_CBOX_LEFTSCORE:
+						scoresel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), CB_GETCURSEL, 0, 0);
+						leftscore = scores[scoresel];
 					break;
 					case VERSUSE_CBOX_RIGHTSCORE:
 						scoresel2 = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTSCORE), CB_GETCURSEL, 0, 0);
 						rightscore = scores[scoresel2];
 					break;
+					*/
 					default:
 						acted = false;
 				}
@@ -134,6 +136,24 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					WriteSaveOrComplain(hWnd);
 					WriteTextOrComplain(hWnd);
 					WriteBracketOrComplain(hWnd);
+				break;				
+				case VERSUSE_OPTION_SHOW1:
+					if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_SHOW1)) {
+						ShowWindow(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), SW_HIDE);
+						ShowWindow(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTNAME), SW_SHOW);
+					} else {
+						ShowWindow(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), SW_SHOW);
+						ShowWindow(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTNAME), SW_HIDE);
+					}
+				break;
+				case VERSUSE_OPTION_SHOW2:
+					if (IsDlgButtonChecked(hWnd, VERSUSE_OPTION_SHOW2)) {
+						ShowWindow(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), SW_HIDE);
+						ShowWindow(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME), SW_SHOW);
+					} else {
+						ShowWindow(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), SW_SHOW);
+						ShowWindow(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME), SW_HIDE);
+					}
 				break;
 				default:
 					acted = false;				
