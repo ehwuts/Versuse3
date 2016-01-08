@@ -7,7 +7,7 @@
 #define VERSUSE_STRING_VERSION "v2.4"
 #define VERSUSE_RES_VERSION 2,4,0,0
 #define VERSUSE_RES_VERSION2 "2.4"
-#define VERSUSE_STRING_CONFIG "versuse-conf.txt"
+#define VERSUSE_STRING_CONFIG "versuse-conf2.txt"
 
 #define VERSUSE_MAIN 150
 #define VERSUSE_ICON 151

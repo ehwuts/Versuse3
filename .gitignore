@@ -1,5 +1,4 @@
 src/*.o
 src/*.res
-bin/*
 versuse-conf.txt
 versuse-out.txt
