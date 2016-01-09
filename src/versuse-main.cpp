@@ -62,6 +62,11 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			SendMessage(hWnd, WM_SETICON, WPARAM(FALSE), LPARAM(hIcon));
 			SendMessage(hWnd, DM_SETDEFID, VERSUSE_BUTTON_WRITE, 0);
 			
+			ShowWindow(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME), SW_HIDE);
+			ShowWindow(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTNAME), SW_HIDE);
+			ShowWindow(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), SW_HIDE);
+			ShowWindow(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), SW_HIDE);
+			
 			LoadDefaults();
 			{
 				std::fstream fs (VERSUSE_STRING_CONFIG, std::ifstream::in);
@@ -102,7 +107,7 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			WriteDisplay(hWnd);
 			DisplayBrackets(GetDlgItem(hWnd, VERSUSE_CBOX_BRACKET));
 			DisplayNames(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTNAME), GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME));
-			//DisplayScores(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTSCORE));
+			DisplayScores(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTSCORE));
 		}
 		break;
 		case WM_COMMAND:
@@ -116,7 +121,6 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						playersel2 = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME), CB_GETCURSEL, 0, 0);
 						rightname = players[playersel2];
 					break;
-					/*
 					case VERSUSE_CBOX_LEFTSCORE:
 						scoresel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), CB_GETCURSEL, 0, 0);
 						leftscore = scores[scoresel];
@@ -125,7 +129,6 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						scoresel2 = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTSCORE), CB_GETCURSEL, 0, 0);
 						rightscore = scores[scoresel2];
 					break;
-					*/
 					default:
 						acted = false;
 				}
@@ -179,6 +182,8 @@ void DefaultNumbers() {
 	scores.push_back("3");
 	scores.push_back("4");
 	scores.push_back("5");
+	scores.push_back("6");
+	scores.push_back("7");
 	scoresel = 0;
 	scoresel2 = 0;
 }
@@ -417,6 +422,7 @@ void DisplayNames(HWND ref, HWND ref2) {
        SendMessage(ref, CB_SETCURSEL, playersel, 0);
        SendMessage(ref2, CB_SETCURSEL, playersel2, 0);
 }
+
 void DisplayScores(HWND ref, HWND ref2) {
        std::vector< std::string >::iterator it = scores.begin();
        while (it != scores.end()) {

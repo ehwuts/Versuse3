@@ -4,9 +4,9 @@
 /*
 * in the land of defines everyone is sad
 */
-#define VERSUSE_STRING_VERSION "v3.3"
-#define VERSUSE_RES_VERSION 3,3,0,0
-#define VERSUSE_RES_VERSION2 "3.3"
+#define VERSUSE_STRING_VERSION "v3.4"
+#define VERSUSE_RES_VERSION 3,4,0,0
+#define VERSUSE_RES_VERSION2 "3.4"
 #define VERSUSE_STRING_CONFIG "versuse-conf3.txt"
 
 #define VERSUSE_MAIN 150
