@@ -116,23 +116,26 @@ BOOL CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					case VERSUSE_CBOX_LEFTNAME:
 						playersel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTNAME), CB_GETCURSEL, 0, 0);
 						leftname = players[playersel];
+						SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTNAME), leftname.c_str());
 					break;
 					case VERSUSE_CBOX_RIGHTNAME:
 						playersel2 = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTNAME), CB_GETCURSEL, 0, 0);
 						rightname = players[playersel2];
+						SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTNAME), rightname.c_str());
 					break;
 					case VERSUSE_CBOX_LEFTSCORE:
 						scoresel = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_LEFTSCORE), CB_GETCURSEL, 0, 0);
 						leftscore = scores[scoresel];
+						SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_LEFTSCORE), leftscore.c_str());
 					break;
 					case VERSUSE_CBOX_RIGHTSCORE:
 						scoresel2 = SendMessage(GetDlgItem(hWnd, VERSUSE_CBOX_RIGHTSCORE), CB_GETCURSEL, 0, 0);
 						rightscore = scores[scoresel2];
+						SetWindowText(GetDlgItem(hWnd, VERSUSE_EDIT_RIGHTSCORE), rightscore.c_str());
 					break;
 					default:
 						acted = false;
 				}
-				WriteDisplay(hWnd);
 			} else switch(LOWORD(wParam)) {
 				case VERSUSE_BUTTON_WRITE:
 					ReadDisplay(hWnd);
