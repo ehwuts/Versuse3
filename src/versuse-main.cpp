@@ -12,7 +12,7 @@ int MinNum(int a, int b) { return (a < b ? a : b); }
 
 void WriteSaveOrComplain(HWND hWnd) { if (WriteSave()) MessageBox(hWnd, "Failed to save default config.", "Err", MB_ICONEXCLAMATION|MB_OK); }
 void ReadSaveOrComplain(HWND hWnd) {
-	if (int i = ReadSave()) MessageBox(hWnd, (i<0?"No brackets in file. Loaded defaults.":"Problem reading existing config."), "Err", MB_ICONEXCLAMATION|MB_OK);
+	if (int i = ReadSave()) MessageBox(hWnd, (i<0?"This is a message.":"Problem reading existing config."), "Err", MB_ICONEXCLAMATION|MB_OK);
 }
 void WriteTextOrComplain(HWND hWnd) { if (WriteText()) MessageBox(hWnd, "Failed to save display text.", "Welp", MB_OK|MB_ICONERROR); }
 void WriteBracketOrComplain(HWND hWnd) { if (WriteBracket()) MessageBox(hWnd, "Failed to save bracket text.", "Rip", MB_OK|MB_ICONERROR); }
@@ -203,7 +203,7 @@ void LoadDefaults() {
 	outw = 69;
 	alignL = 2;
 	alignR = 2;
-	mono = 0;
+	mono = 1;
 	leftname = "";
 	leftscore = "0";
 	rightname = "";
