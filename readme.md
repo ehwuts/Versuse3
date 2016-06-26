@@ -1,10 +1,7 @@
-Usage
+About
 =====
-```
-make
-make clean
-rm -rf .
-```
+Hairy c/c++/winapi app to generate formatted text strings intended 
+for use with streaming 1v1 tournaments.
 
 License
 =======
