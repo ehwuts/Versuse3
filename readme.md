@@ -1,3 +1,9 @@
+Usage
+=====
+./makefile.sh
+
+Requires working g++ and windres in path to compile out of the box.
+
 About
 =====
 Hairy c/c++/winapi app to generate formatted text strings intended 
